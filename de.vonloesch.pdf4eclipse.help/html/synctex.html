@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>SyncTeX support</title>
+</head>
+
+<body>
+<h1>SyncTeX support</h1>
+SyncTeX is a extension, which enables synchronization of pdf documents and 
+its (La)TeX sources. 
+It is supported in most modern LaTeX distributions, e.g., 
+in <a href="http://www.tug.org/texlive/">TeXLive</a> since TeXLive 2008 and 
+in <a href="http://miktex.org">MikTeX</a> since version 2.7.<br />
+
+To enable SyncTeX for your build, you need to activate it with the 
+<tt>-synctex</tt> command line switch, 
+e.g., <tt>pdflatex -synctex=1 test.tex</tt> <br />
+<br />
+More technical details about SyncTeX can be found on the official 
+<a href="http://itexmac.sourceforge.net/SyncTeX.html">SyncTeX page</a>.<br />
+<br />
+Pdf4Eclipse natively supports SyncTeX and enables the user to use both the 
+forward and inverse search features.
+For this it uses its own SyncTeX parser, since there is no official Java 
+implementation. 
+Therefore, it can happen that the forward and inverse search results are 
+different from the results in other PDF viewers. 
+
+<h2>Forward search</h2>
+By <i>forward search</i> we denote the process of finding the position in the 
+pdf file that corresponds to the cursor position in the active tex-file. 
+<b>For a successful forward search it is necessary that the corresponding pdf 
+file is already open in Eclipse.</b>
+To make a forward search, open the context menu by right-clicking somewhere 
+in the editor and selecting <i>Forward search</i>. Another possibility is to 
+use the short key <i>Ctrl+Alt+F</i>.<br /> 
+<br />
+<img src="pics/forwardSearch.png" alt="Forward search" /><br />
+This command is enabled in every text editor.
+
+<h2>Inverse search</h2>
+By <i>inverse search</i> we denote the process of the line in the source file
+that corresponds to the mouse cursor position in the pdf-file. 
+A inverse search is triggered by a simple double-click in the pdf document on 
+the searched position. If it successful, 
+Pdf4Eclipse opens the source file and highlights the line that fits best.
+</body>
+</html>

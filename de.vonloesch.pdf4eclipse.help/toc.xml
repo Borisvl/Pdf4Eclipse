@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Pdf4Eclipse documentation">
+	<topic href="html/start.html" label="Getting started">
+ </topic>
+ <topic href="html/synctex.html" label="SyncTeX support">
+ </topic>
+</toc>

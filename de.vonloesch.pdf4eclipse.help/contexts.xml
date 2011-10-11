@@ -1,0 +1,16 @@
+<contexts>
+	<context id="forwardSearch" title="Forward search">
+		<description>Searches the current cursor position in all open pdf files.</description>
+		<topic href="html/synctex.html" label="SyncTeX support">
+			<enablement>
+				<with variable="platform">
+	            	<test property="org.eclipse.core.runtime.isBundleInstalled" args="org.eclipse.platform.doc.isv"/>
+	     		</with>
+			</enablement>
+		</topic>
+	</context>
+ <context id="annotationsToggle">
+    <description>Turn annotations on and off.</description>
+    <topic href="html/start.html#annotations" label="Annotations"/>
+ </context>
+</contexts>
