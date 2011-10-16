@@ -10,26 +10,26 @@
             extensions="pdf"
             icon="icons/document-pdf.png"
             id="de.vonloesch.pdf4eclipse.editors.PDFEditor"
-            name="PDF Viewer">
+            name="%editor.name">
       </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ForwardSearchHandler"
-            description="Toggles a forward search to all open pdf documents"
+            description="%command.description"
             helpContextId="de.vonloesch.pdf4eclipse.forwardSearch"
             id="PDFViewer.command.forwardSearchAction"
-            name="Forward search">
+            name="%command.name">
       </command>
       <command
             defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ZoomHandler"
-            description="Set the zoom level"
+            description="%command.description.0"
             id="PDFViewer.command.Zoom"
-            name="Zoom">
+            name="%command.name.0">
          <commandParameter
                id="PDFViewer.command.parameter.zoom"
-               name="zoomlevel"
+               name="%commandParameter.name"
                optional="false">
          </commandParameter>
       </command>
@@ -37,7 +37,7 @@
             defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler"
             helpContextId="de.vonloesch.pdf4eclipse.annotationsToggle"
             id="PDFViewer.command.ToggleLinkHighlight"
-            name="Toggle highlight">
+            name="%command.name.1">
          <state
                id="org.eclipse.ui.commands.toggleState">
             <class
@@ -111,7 +111,7 @@
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/magnifier--minus.png"
                   style="push"
-                  tooltip="Zoom out">
+                  tooltip="%command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <reference
@@ -127,7 +127,7 @@
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/arrow-move.png"
                   style="push"
-                  tooltip="Fit page to window">
+                  tooltip="%command.tooltip.0">
                <visibleWhen
                      checkEnabled="false">
                   <reference
@@ -143,7 +143,7 @@
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/arrow-resize.png"
                   style="push"
-                  tooltip="Fit page to window width">
+                  tooltip="%command.tooltip.1">
                <visibleWhen
                      checkEnabled="false">
                   <reference
@@ -159,7 +159,7 @@
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/magnifier--plus.png"
                   style="push"
-                  tooltip="Zoom in">
+                  tooltip="%command.tooltip.2">
                <visibleWhen
                      checkEnabled="false">
                   <reference
@@ -175,7 +175,7 @@
                   commandId="PDFViewer.command.ToggleLinkHighlight"
                   icon="icons/chain--pencil.png"
                   style="toggle"
-                  tooltip="Toggle link highlighting">
+                  tooltip="%command.tooltip.3">
                <visibleWhen
                      checkEnabled="false">
                   <reference
@@ -202,7 +202,7 @@
          point="org.eclipse.ui.contexts">
       <context
             id="PDFViewer.editors.contextid"
-            name="PDF viewer"
+            name="%context.name"
             parentId="org.eclipse.ui.contexts.window">
       </context>
    </extension>

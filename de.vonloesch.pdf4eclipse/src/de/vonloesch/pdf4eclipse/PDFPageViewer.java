@@ -110,6 +110,9 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 			
 			@Override
 			public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
+				
+				if (e.button != 1) return;
+				
 				List<PDFAnnotation> annos = getPage().getAnnots(PDFAnnotation.LINK_ANNOTATION);
             	for (PDFAnnotation a : annos) {
             		LinkAnnotation aa = (LinkAnnotation) a;
@@ -135,11 +138,11 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 									
 									try {
 										String uri = action.getUri();
-										if (uri.toLowerCase().indexOf("://") < 0) {
-											uri = "http://"+uri;
+										if (uri.toLowerCase().indexOf("://") < 0) { //$NON-NLS-1$
+											uri = "http://"+uri; //$NON-NLS-1$
 										}
 										PlatformUI.getWorkbench().getBrowserSupport()
-										.createBrowser("PDFBrowser").openURL(new URL(uri));
+										.createBrowser("PDFBrowser").openURL(new URL(uri)); //$NON-NLS-1$
 									} catch (PartInitException e) {
 										e.printStackTrace();
 									} catch (MalformedURLException e) {
@@ -155,6 +158,9 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 			
 			@Override
 			public void mouseDoubleClick(org.eclipse.swt.events.MouseEvent e) {
+				
+				if (e.button != 1) return;
+				
 				final Rectangle2D r = convertImage2PDFCoord(new java.awt.Rectangle(e.x, e.y, 1, 1));
 
 				Display.getDefault().asyncExec(new Runnable() {
@@ -348,7 +354,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	try {
     		currentXform = currentXform.createInverse();
     	} catch (NoninvertibleTransformException nte) {
-    		System.out.println("Error inverting page transform!");
+    		System.out.println(Messages.PDFPageViewer_Error1);
     		nte.printStackTrace();
     	}
 
@@ -422,7 +428,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             g.setForeground(getBackground());
             g.fillRectangle(0, 0, sz.x, sz.y);
             g.setForeground(display.getSystemColor(SWT.COLOR_BLACK));
-            g.drawString("No page selected", sz.x / 2 - 30, sz.y / 2);
+            g.drawString(Messages.PDFPageViewer_1, sz.x / 2 - 30, sz.y / 2);
         } else {
             // draw the image
             int imwid = currentImage.getWidth(null);

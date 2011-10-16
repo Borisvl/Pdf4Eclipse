@@ -37,12 +37,12 @@ public class PDFNavigationLocation extends NavigationLocation {
 	
 	@Override
 	public void saveState(IMemento memento) {
-		memento.putInteger("Page", page);
+		memento.putInteger("Page", page); //$NON-NLS-1$
 	}
 	
 	@Override
 	public void restoreState(IMemento memento) {
-		page = memento.getInteger("Page");
+		page = memento.getInteger("Page"); //$NON-NLS-1$
 		restoreLocation();
 	}
 	

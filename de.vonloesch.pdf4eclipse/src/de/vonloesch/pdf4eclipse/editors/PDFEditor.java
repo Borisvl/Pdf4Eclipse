@@ -34,6 +34,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.FocusEvent;
@@ -68,6 +69,7 @@ import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFObject;
 import com.sun.pdfview.PDFPage;
 
+import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
@@ -81,8 +83,8 @@ import de.vonloesch.synctex.SimpleSynctexParser;
 public class PDFEditor extends EditorPart implements IResourceChangeListener, 
 	INavigationLocationProvider, IPageChangeListener{
 
-	public static final String ID = "de.vonloesch.pdf4eclipse.editors.PDFEditor";
-	public static final String CONTEXT_ID = "PDFViewer.editors.contextid";
+	public static final String ID = "de.vonloesch.pdf4eclipse.editors.PDFEditor"; //$NON-NLS-1$
+	public static final String CONTEXT_ID = "PDFViewer.editors.contextid"; //$NON-NLS-1$
 
 	public static final int FORWARD_SEARCH_OK = 0;
 	public static final int FORWARD_SEARCH_NO_SYNCTEX = -1;
@@ -90,7 +92,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	public static final int FORWARD_SEARCH_POS_NOT_FOUND = -3;
 	public static final int FORWARD_SEARCH_UNKNOWN_ERROR = -4;
 
-	static final String PDFPOSITION_ID = "PDFPosition";
+	static final String PDFPOSITION_ID = "PDFPosition"; //$NON-NLS-1$
 	
 	public PDFPageViewer pv;
 	private File file;
@@ -149,13 +151,13 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			file = new File(((IFileEditorInput) input).getFile().getLocationURI());
 		}
 		else {
-			throw new PartInitException("Only physical files can be shown");
+			throw new PartInitException(Messages.PDFEditor_ErrorMsg1);
 		}
 		f = null;
 		try {
 			long len = file.length();
 			if (len > Integer.MAX_VALUE) {
-				throw new IOException("File too long to decode: " + file.getName());
+				throw new IOException(Messages.PDFEditor_ErrorMsg2 + file.getName());
 			}
 			int contentLength = (int) len;
 			/*if (len <= MAX_DIRECT_FILESIZE) {
@@ -172,7 +174,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				buf = ByteBuffer.wrap(byteBuf);
 			}
 			else {*/
-			RandomAccessFile ff = new RandomAccessFile(file, "r");
+			RandomAccessFile ff = new RandomAccessFile(file, "r"); //$NON-NLS-1$
 			buf = ByteBuffer.allocateDirect((int) contentLength);
 			FileChannel c = ff.getChannel();
 			c.read(buf);
@@ -185,9 +187,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			f = new PDFFile(buf);	  
 			pageNumbers = f.getNumPages();
 		} catch (FileNotFoundException fnfe) {
-			throw new PartInitException("Could not find input File", fnfe);
+			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {
-			throw new PartInitException("Could not read input File", ioe);
+			throw new PartInitException(Messages.PDFEditor_ErrorMsg4, ioe);
 		} 
 	}
 
@@ -375,9 +377,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	private File getSyncTeXFile() {
 		String name = file.getAbsolutePath();
 		name = name.substring(0, name.lastIndexOf('.'));
-		File f = new File(name + ".synctex.gz");
+		File f = new File(name + ".synctex.gz"); //$NON-NLS-1$
 		if (f.exists()) return f;
-		f = new File(name + ".synctex");
+		f = new File(name + ".synctex"); //$NON-NLS-1$
 		if (f.exists()) return f;
 		return null;
 	}
@@ -437,7 +439,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	public void reverseSearch(double pdfX, double pdfY) {
 		File f = getSyncTeXFile();
 		if (f == null) {
-			writeStatusLineError("Could not find SyncTeX file");
+			writeStatusLineError(Messages.PDFEditor_SynctexMsg1);
 			return;
 		}
 		//File f = new File (((IFileEditorInput) getEditorInput()).getFile().getRawLocation().removeFileExtension().addFileExtension("synctex.gz").toOSString());
@@ -453,7 +455,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 			if (p.sourceFilePath == null) {
 				//Could not find a source file
-				writeStatusLineError("Could not find source position");
+				writeStatusLineError(Messages.PDFEditor_SynctexMsg2);
 				return;
 			}
 
@@ -477,13 +479,13 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				} catch (PartInitException e) {
 					e.printStackTrace();
 				} catch (BadLocationException e) {
-					writeStatusLineError("Line "+ (p.sourceLineNr - 1) +" does not exist.");
+					writeStatusLineError(NLS.bind(Messages.PDFEditor_SynctexMsg3, p.sourceLineNr - 1));
 				}
 			} else {
-				writeStatusLineError("Source file "+path+" does not exist.");
+				writeStatusLineError(NLS.bind(Messages.PDFEditor_SynctexMsg4, path));
 			}
 		} catch (FileNotFoundException e) {
-			writeStatusLineError("Could not find SyncTeX file "+f.getName());
+			writeStatusLineError(NLS.bind(Messages.PDFEditor_SynctexMsg5, f.getName()));
 		}
 		catch (IOException e1) {
 			writeStatusLineError("Error while parsing SyncTeX file "+f.getName());
@@ -502,7 +504,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			pv.showPage(pager);
 			updateStatusLine();
 		} catch (IOException e) {
-			System.err.println("Could not find the page");
+			System.err.println(Messages.PDFEditor_ErrorMsg5);
 		}
 	}
 
@@ -606,7 +608,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 			@Override
 			public void run() {
-				statusLineM.setErrorMessage("");				
+				statusLineM.setErrorMessage("");				 //$NON-NLS-1$
 			}
 		});
 	}

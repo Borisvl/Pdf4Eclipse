@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import de.vonloesch.pdf4eclipse.Messages;
+
 public class StatusLinePageSelector extends ContributionItem {
 	private final static int DEFAULT_CHAR_WIDTH = 40;
 	
@@ -119,11 +121,11 @@ public class StatusLinePageSelector extends ContributionItem {
 		c.setLayout(new GridLayout(2, false));
 		
 		pageField = new Text(c, SWT.SINGLE | SWT.RIGHT | SWT.BORDER);
-		pageField.setToolTipText("Enter a page number and press enter");
-		pageField.setTextLimit((""+this.pageNr).length());
+		pageField.setToolTipText(Messages.StatusLinePageSelector_tooltip);
+		pageField.setTextLimit((""+this.pageNr).length()); //$NON-NLS-1$
 		
 		pageNrField = new Label(c, SWT.SHADOW_NONE);
-		pageNrField.setText(" / "+this.pageNr);
+		pageNrField.setText(" / "+this.pageNr); //$NON-NLS-1$
 		
 		pageField.addKeyListener(new KeyAdapter() {
 			@Override
@@ -133,11 +135,11 @@ public class StatusLinePageSelector extends ContributionItem {
 					return;
 				}
 				else if (e.keyCode == SWT.PAGE_UP && page > 1) {
-					pageField.setText("" + (page-1));
+					pageField.setText("" + (page-1)); //$NON-NLS-1$
 					firePageNrChangeListener();
 				}
 				else if (e.keyCode == SWT.PAGE_DOWN && page < pageNr) {
-					pageField.setText("" + (page+1));
+					pageField.setText("" + (page+1)); //$NON-NLS-1$
 					firePageNrChangeListener();
 				}
 				
@@ -148,8 +150,8 @@ public class StatusLinePageSelector extends ContributionItem {
 			public void keyReleased(org.eclipse.swt.events.KeyEvent e) {
 				if(e.keyCode == 13) {
 					if (!checkPage()) {
-						MessageDialog.openError(statusLine.getShell(), "No valid page", 
-								"Please enter a page number between 1 and "
+						MessageDialog.openError(statusLine.getShell(), Messages.StatusLinePageSelector_errorMsg1, 
+								Messages.StatusLinePageSelector_errorMsg2
 								+pageNr);
 						e.doit = false;
 						return;
@@ -168,7 +170,7 @@ public class StatusLinePageSelector extends ContributionItem {
 		GridData d = new GridData(fm.getAverageCharWidth()*4 + pageField.getBorderWidth(), 
 				fm.getHeight() + pageField.getBorderWidth());
 		pageField.setLayoutData(d);
-		pageField.setText(""+this.page);
+		pageField.setText(""+this.page); //$NON-NLS-1$
 		gc.dispose();
 
 		StatusLineLayoutData data = new StatusLineLayoutData();
@@ -206,11 +208,11 @@ public class StatusLinePageSelector extends ContributionItem {
 		this.pageNr = pageNumbers;
 
 		if (pageField != null && !pageField.isDisposed()) {
-			pageField.setTextLimit((""+this.pageNr).length());
-			pageField.setText(""+this.page);
+			pageField.setTextLimit((""+this.pageNr).length()); //$NON-NLS-1$
+			pageField.setText(""+this.page); //$NON-NLS-1$
 		}
 		if (pageNrField != null && !pageNrField.isDisposed()) {
-			pageNrField.setText(" / "+this.pageNr);
+			pageNrField.setText(" / "+this.pageNr); //$NON-NLS-1$
 		}
 
 		if (!isVisible()) {

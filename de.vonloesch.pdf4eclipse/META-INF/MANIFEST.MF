@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Pdf4Eclipse
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: de.vonloesch.pdf4Eclipse;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: de.vonloesch.pdf4eclipse.Activator
@@ -18,4 +18,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/jbig2.jar,
  lib/PDFrenderer.jar
-Bundle-Vendor: Boris von Loesch
+Bundle-Vendor: %Bundle-Vendor
