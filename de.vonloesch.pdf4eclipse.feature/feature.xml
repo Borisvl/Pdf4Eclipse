@@ -10,10 +10,11 @@
       Pdf4Eclipse is a pdf viewer plugin for Eclipse. One of its notable features is a complete integration of SyncTeX, which allows forward and inverse search.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
+   <copyright>
       Copyright (c) 2011 Boris von Loesch.
 All rights reserved. This program and the accompanying materials
-are made available under the terms of the Eclipse Public License v1.0
+are made available under the terms of the Eclipse Public License
+v1.0
 which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
    </copyright>
@@ -109,7 +110,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <url>
-      <update label="Pdf4Eclipse update site" url="http://borisvl.github.com/pdf4eclipse/"/>
+      <update label="Pdf4Eclipse update site" url="http://borisvl.github.com/Pdf4Eclipse"/>
    </url>
 
    <requires>
