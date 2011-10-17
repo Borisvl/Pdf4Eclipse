@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="de.vonloesch.pdf4eclipse.feature"
+      id="de.vonloesch.pdf4eclipse"
       label="PDF4Eclipse"
       version="1.0.0"
-      provider-name="Boris von Loesch"
-      nl="en">
+      provider-name="Boris von Loesch">
 
    <description url="http://borisvl.github.com/Pdf4Eclipse">
       Pdf4Eclipse is a pdf viewer plugin for Eclipse. One of its notable features is a complete integration of SyncTeX, which allows forward and inverse search.
