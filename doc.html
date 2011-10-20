@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-GB">
+  
+  <head>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Language" content="en-GB" />
+    <meta name="author" content="Your Name" />
+    <meta name="abstract" content="Webside of PDF4Eclipse." />
+    <meta name="description" content="Pdf4Eclipse is a pdf reader plugin for Eclipse." />
+    <meta name="keywords" content="Eclipse, pdf, plugin, Pdf4Eclipse" />
+    <meta name="distribution" content="global" />
+    <meta name="revisit-after" content="1 days" />	
+    <meta name="copyright" content="All content (c) Boris von Loesch" />
+    
+    <title>Pdf4Eclipse</title>
+    
+    <style type="text/css" title="The shiny, Web 2.0 version of 'Simplicity,' a pseudo-professional style-sheet." media="all">
+      @import "layout/simplicity-two-oh-three.css";
+    </style>
+    <!--[if IE]>
+    <style type="text/css" media="all">
+      @import "layout/ie-diff.css";
+    </style> 
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="layout/print.css" media="print" />
+    <link rel="shortcut icon" href="http://wherever-your-favicon-is.org/favicon.png"  />
+    <link rel="icon" href="http://wherever-your-favicon-is.org/favicon.png" />
+    
+  </head>
+  
+  <body>
+    
+    <div id="window">
+      <div id="container">
+	
+	<div id="navigation">
+	  <ul>
+	    <!-- The link you call "active" will show up as a darker tab -->
+	    <!--[if IE 6]><li></li><![endif]-->
+	    <li><a href="index.html">Main</a></li>
+	    <li class="active"><a href="doc.html">Documentation</a></li>
+	    <li><a href="https://github.com/Borisvl/Pdf4Eclipse">Developer</a></li>
+	  </ul>
+	</div>
+	
+	<div id="main">
+	  <div id="outer-prettification">
+	    <div id="inner-prettification">
+	      
+	      <div id="header">
+    <h1 id="title"><a href="doc.html">Pdf4Eclipse: Documentation</a></h1>
+	      </div>
+	      
+	      <div id="contents">
+
+<h2>Navigation</h2>
+<p>
+To navigate in a pdf document you can use the keyboard or the mouse wheel. 
+Besides that it is possible to jump to a specific page number by entering it 
+into the page field in the status bar.<br />
+<img class="centered-photo" src="pics/pageField.png" alt="Page selection" />
+</p>
+<h3>Outline</h3>
+<p>
+If it is included in the pdf document, Pdf4Eclipse can show the bookmarks 
+(often more like a table of contents) of the document in the <i>Outline view</i>.
+You can directly jump to a specific bookmark by selecting it in the outline.
+<br />
+<img class="centered-photo" src="pics/outline.png" alt="Outline" />
+</p>
+<h3 id="annotations">Annotations</h3>
+<p>Another possibility to navigate in a pdf is by using annotations which are 
+marked by a red frame in the document. By clicking inside this frame you go 
+to the specified location. This could also be a web page in which case a 
+browser window is opened.</p>
+<p>
+You can always go back to the last position by using the navigation buttons
+in the task bar or the corresponding entries in the <i>Navigate</i>-Menu.
+</p>
+<p>
+The highlighting of annotations can be turned on and off 
+by a button in the task bar.
+<br />
+<img class="centered-photo" src="pics/annotations.png" alt="Annotations" />
+</p>
+
+<h2>Zoom</h2>
+<p>
+You can change the presentation of the pdf by changing the zoom factor with the
+buttons on the task bar or '+' and '-' keys. <br /> 
+<img class="centered-photo" src="pics/zoomControls.png" alt="Zoom controls" /><br />
+</p>
+
+<h2 id="synctex">SyncTeX support</h2>
+<p>
+SyncTeX is a extension, which enables synchronization of pdf documents and
+its (La)TeX sources.
+It is supported in most modern LaTeX distributions, e.g.,
+in <a href="http://www.tug.org/texlive/">TeXLive</a> since TeXLive 2008 and
+in <a href="http://miktex.org">MikTeX</a> since version 2.7.
+</p>
+<p>
+To enable SyncTeX for your build, you need to activate it with the
+<tt>-synctex</tt> command line switch,
+e.g., <tt>pdflatex -synctex=1 test.tex</tt> <br />
+</p>
+<p>
+More technical details about SyncTeX can be found on the official
+<a href="http://itexmac.sourceforge.net/SyncTeX.html">SyncTeX page</a>.
+</p>
+<p>
+Pdf4Eclipse natively supports SyncTeX and enables the user to use both the
+forward and inverse search features.
+For this it uses its own SyncTeX parser, since there is no official Java
+implementation.
+Therefore, it can happen that the forward and inverse search results are
+different from the results in other PDF viewers.
+</p>
+<h3>Forward search</h3>
+<p>
+By <i>forward search</i> we denote the process of finding the position in the
+pdf file that corresponds to the cursor position in the active tex-file.
+<b>For a successful forward search it is necessary that the corresponding pdf
+file is already open in Eclipse.</b>
+To make a forward search, open the context menu by right-clicking somewhere
+in the editor and selecting <i>Forward search</i>. Another possibility is to
+use the short key <i>Ctrl+Alt+F</i>.</p>
+<p>
+<img class="centered-photo" src="pics/forwardSearch.png" alt="Forward search" />
+This command is enabled in every text editor.
+</p>
+<h3>Inverse search</h3>
+<p>
+By <i>inverse search</i> we denote the process of the line in the source file
+that corresponds to the mouse cursor position in the pdf-file.
+A inverse search is triggered by a simple double-click in the pdf document on
+the searched position. If it successful,
+Pdf4Eclipse opens the source file and highlights the line that fits best.
+</p>
+        </div>
+
+              <div id="footer">
+		<p>
+    <a href="https://github.com/borisvl">v1.0.0 &copy; B. von Loesch</a></p>
+		<!-- You can do whatever you like here -->
+		</div>
+	    </div>
+	  </div>
+	</div>
+
+      </div>
+    </div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-506410-5']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+
+</html>

@@ -1,79 +1,124 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset='utf-8'>
-
-  <title>Borisvl/Pdf4Eclipse @ GitHub</title>
-
-  <style type="text/css">
-    body {
-      margin-top: 1.0em;
-      background-color: #4ecdba;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
-      color: #000000;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-    h1 { font-size: 3.8em; color: #b13245; margin-bottom: 3px; }
-    h1 .small { font-size: 0.4em; }
-    h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #b13245; }
-    h3 { text-align: center; color: #b13245; }
-    a { color: #b13245; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-  </style>
-</head>
-
-<body>
-  <div id="container">
-
-    <div class="download">
-      <a href="http://github.com/Borisvl/Pdf4Eclipse/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/Borisvl/Pdf4Eclipse/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
-
-    <h1><a href="http://github.com/Borisvl/Pdf4Eclipse">Pdf4Eclipse</a>
-      <span class="small">by <a href="http://github.com/Borisvl">Borisvl</a></span></h1>
-
-    <div class="description">
-      A pdf viewer for Eclipse.
-    </div>
-
-    <h2>License</h2>
-<p>EPL</p>
-<h2>Authors</h2>
-<p>Boris von Loesch</p>
-<h2>Contact</h2>
-<p>Use Github
-<br/>
-</p>
-
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/Borisvl/Pdf4Eclipse/zipball/master">zip</a> or
-      <a href="http://github.com/Borisvl/Pdf4Eclipse/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/Borisvl/Pdf4Eclipse</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/Borisvl/Pdf4Eclipse">Borisvl/Pdf4Eclipse</a>
-    </div>
-
-  </div>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-GB">
   
-</body>
+  <head>
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Language" content="en-GB" />
+    <meta name="author" content="Your Name" />
+    <meta name="abstract" content="Webside of PDF4Eclipse." />
+    <meta name="description" content="Pdf4Eclipse is a pdf reader plugin for Eclipse." />
+    <meta name="keywords" content="Eclipse, pdf, plugin, Pdf4Eclipse" />
+    <meta name="distribution" content="global" />
+    <meta name="revisit-after" content="1 days" />	
+    <meta name="copyright" content="All content (c) Boris von Loesch" />
+    
+    <title>Pdf4Eclipse</title>
+    
+    <style type="text/css" title="The shiny, Web 2.0 version of 'Simplicity,' a pseudo-professional style-sheet." media="all">
+      @import "layout/simplicity-two-oh-three.css";
+    </style>
+    <!--[if IE]>
+    <style type="text/css" media="all">
+      @import "layout/ie-diff.css";
+    </style> 
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="layout/print.css" media="print" />
+    <link rel="shortcut icon" href="http://wherever-your-favicon-is.org/favicon.png"  />
+    <link rel="icon" href="http://wherever-your-favicon-is.org/favicon.png" />
+    
+  </head>
+  
+  <body>
+    
+    <div id="window">
+      <div id="container">
+	
+	<div id="navigation">
+	  <ul>
+	    <!-- The link you call "active" will show up as a darker tab -->
+	    <!--[if IE 6]><li></li><![endif]-->
+	    <li class="active"><span>Main</span></li>
+	    <li><a href="doc.html">Documentation</a></li>
+	    <li><a href="https://github.com/Borisvl/Pdf4Eclipse">Developer</a></li>
+	  </ul>
+	</div>
+	
+	<div id="main">
+	  <div id="outer-prettification">
+	    <div id="inner-prettification">
+	      
+	      <div id="header">
+		<h1 id="title"><a href="index.html">Pdf4Eclipse, a pdf reader plugin for Eclipse</a></h1>
+	      </div>
+	      
+	      <div id="contents">
+		<p>Pdf4Eclipse enriches Eclipse with a pdf reader. One of its notable feature is
+		a complete integration of SyncTeX, which allows forward and inverse search in pdf files.
+		This makes it a perfect viewer for documents created with 
+    <a href="http://texlipse.sf.net">TeXlipse</a>.</p>
+    <h2>Screenshot</h2>
+    <p>
+    The following screenshot shows a side-by-side view of a LaTeX document and
+    its corresponding pdf document. The blue box in the pdf document is the result
+    of a forward search.   
+    <a href="pics/screenshot.jpg">
+    <img class="centered-photo" src="pics/screenshot_thumb.jpg" alt="Install" />
+    </a>
+    </p>
+    <h2>Features</h2>
+    <ul>
+    <li>Support of a wide range of pdf documents</li>
+    <li>Bookmarks can be shown in the outline view</li>
+    <li>Uses the look-and-feel of Eclipse</li>
+    <li>Supports links in pdfs</li>
+    <li><a href="doc.html#synctex">SyncTeX integration</a></li>
+    <li>Automatically reload when pdf changes</li>
+    <li>Written solely in Java</li>
+    <li>Open-Source</li>
+    </ul>
+		<div class="comment">
+		<b>Note:</b> It was not the intention for the development of Pdf4Eclipse to replace your default
+		Pdf viewer but to have a viewer in Eclipse to preview your LaTeX documents and
+		show some documentation.
+    Hence, some common features are missing like searching inside
+		documents or printing of pdfs. Maybe some of them will be added in a later version.
+		<a href="https://github.com/Borisvl/Pdf4Eclipse>Help</a> is always welcome.
+		</div>
+		
+    <h2>Quick installation</h2>
+		<p>To install the plugin simply open "Help/Install new plugins..." and use the site:
+    <div class="console">http://borisvl.github.com/Pdf4Eclipse</div>
+    <img class="centered-photo" src="pics/install.png" alt="Install" />
+    </p>
+	      
+        </div>
+
+              <div id="footer">
+		<p>
+    <a href="https://github.com/borisvl">v1.0.0 &copy; B. von Loesch</a></p>
+		<!-- You can do whatever you like here -->
+		</div>
+	    </div>
+	  </div>
+	</div>
+
+      </div>
+    </div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-506410-5']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+
 </html>

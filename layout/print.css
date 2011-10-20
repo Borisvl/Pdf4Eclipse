@@ -1,0 +1,44 @@
+#navigation,#footer {
+display:none; 
+}
+
+a:link,a:visited {
+color: #356AA0; 
+text-decoration: underline; 
+}
+
+div.comment, div.showcase {
+font-style:italic;
+-moz-border-radius:0;
+border:0;
+}
+
+div.console {
+-moz-border-radius:0;
+background-color:#fff;
+color:#000;
+}
+
+div.contact, table.statistics {
+-moz-border-radius:0;
+}
+
+div.comment img, div.contact img{
+display:none;
+}
+
+#contents ol li, #contents ol.courses
+{
+border:0; 
+padding:0;
+}
+
+ol li img, ol.courses li img
+{
+display:none;
+}
+
+#contents p img
+{
+display:none;
+}
