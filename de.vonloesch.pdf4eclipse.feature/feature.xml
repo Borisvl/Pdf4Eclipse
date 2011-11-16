@@ -2,7 +2,7 @@
 <feature
       id="de.vonloesch.pdf4eclipse"
       label="PDF4Eclipse"
-      version="1.0.0"
+      version="1.0.1"
       provider-name="Boris von Loesch">
 
    <description url="http://borisvl.github.com/Pdf4Eclipse">
