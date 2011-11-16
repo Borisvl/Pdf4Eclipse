@@ -6,6 +6,9 @@
    <feature url="features/de.vonloesch.pdf4eclipse_1.0.0.jar" id="de.vonloesch.pdf4eclipse" version="1.0.0">
       <category name="Pdf4Eclipse"/>
    </feature>
+   <feature url="features/de.vonloesch.pdf4eclipse_1.0.1.jar" id="de.vonloesch.pdf4eclipse" version="1.0.1">
+      <category name="Pdf4Eclipse"/>
+   </feature>
    <category-def name="Pdf4Eclipse" label="Pdf4Eclipse">
       <description>
          A pdf viewer for Eclipse
