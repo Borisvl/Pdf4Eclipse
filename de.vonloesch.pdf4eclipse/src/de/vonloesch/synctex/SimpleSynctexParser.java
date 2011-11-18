@@ -82,6 +82,18 @@ public class SimpleSynctexParser {
 		dist = Double.MAX_VALUE;
 	}
 	
+	/**
+	 * Closes the SimpleSynctexParser and releases any
+	 * system resources  associated with it.
+	 * Once the stream has been closed, further 
+	 * startForward or startReverse
+	 * invocations will throw an IOException.
+	 * @throws IOException
+	 */
+	public void close() throws IOException {
+		if (in != null) in.close();
+	}
+	
 	private void resetBox() {
 		pdfX = Integer.MAX_VALUE;
 		pdfY = Integer.MAX_VALUE;

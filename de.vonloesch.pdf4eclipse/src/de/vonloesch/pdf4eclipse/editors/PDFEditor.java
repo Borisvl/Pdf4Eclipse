@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -383,6 +384,19 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (f.exists()) return f;
 		return null;
 	}
+	
+	private SimpleSynctexParser createSimpleSynctexParser(File f) 
+		throws IOException {
+		InputStream in;
+		if (f.getName().toLowerCase().endsWith(".gz")) {
+			in = new GZIPInputStream(new FileInputStream(f));
+		}
+		else {
+			in = new FileInputStream(f);
+		}
+		BufferedReader r = new BufferedReader(new InputStreamReader(in));
+		return new SimpleSynctexParser(r);
+	}
 
 	/**
 	 * Starts a forward search in the current pdf-editor. The editor
@@ -399,14 +413,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (f == null) return FORWARD_SEARCH_NO_SYNCTEX;
 		try {
 			//FIXME: Create a job for this
-			GZIPInputStream in;
-			in = new GZIPInputStream(new FileInputStream(f));
-			BufferedReader r = new BufferedReader(new InputStreamReader(in));
-			SimpleSynctexParser p = new SimpleSynctexParser(r);
+			SimpleSynctexParser p = createSimpleSynctexParser(f);
 			//System.out.println("Start Forward search");
 			p.setForwardSearchInformation(file, lineNr);
 			p.startForward();
-			r.close(); in.close();
+			p.close();
+			
 			double[] result = p.getForwardSearchResult();
 			if (result == null) return FORWARD_SEARCH_FILE_NOT_FOUND;
 
@@ -445,13 +457,10 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		//File f = new File (((IFileEditorInput) getEditorInput()).getFile().getRawLocation().removeFileExtension().addFileExtension("synctex.gz").toOSString());
 		try {
 			//FIXME: Create a job for this
-			GZIPInputStream in;
-			in = new GZIPInputStream(new FileInputStream(f));
-			BufferedReader r = new BufferedReader(new InputStreamReader(in));
-			SimpleSynctexParser p = new SimpleSynctexParser(r);
+			SimpleSynctexParser p = createSimpleSynctexParser(f);
 			p.setReverseSearchInformation(currentPage, pdfX, pdfY);
 			p.startReverse();
-			r.close(); in.close();
+			p.close();
 
 			if (p.sourceFilePath == null) {
 				//Could not find a source file
