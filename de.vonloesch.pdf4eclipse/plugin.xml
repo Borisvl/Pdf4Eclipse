@@ -16,6 +16,7 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
+            categoryId="de.vonloesch.pdf4Eclipse.category"
             defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ForwardSearchHandler"
             description="%command.description"
             helpContextId="de.vonloesch.pdf4eclipse.forwardSearch"
@@ -23,6 +24,7 @@
             name="%command.name">
       </command>
       <command
+            categoryId="de.vonloesch.pdf4Eclipse.category"
             defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ZoomHandler"
             description="%command.description.0"
             id="PDFViewer.command.Zoom"
@@ -34,6 +36,7 @@
          </commandParameter>
       </command>
       <command
+            categoryId="de.vonloesch.pdf4Eclipse.category"
             defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler"
             helpContextId="de.vonloesch.pdf4eclipse.annotationsToggle"
             id="PDFViewer.command.ToggleLinkHighlight"
@@ -53,6 +56,10 @@
             </class>
          </state>
       </command>
+      <category
+            id="de.vonloesch.pdf4Eclipse.category"
+            name="Pdf4Eclipse">
+      </category>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
