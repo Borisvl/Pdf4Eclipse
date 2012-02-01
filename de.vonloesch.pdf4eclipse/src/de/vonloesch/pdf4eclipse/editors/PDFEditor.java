@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Boris von Loesch - initial API and implementation
+ *     MeisterYeti - pseudo-continuous scrolling and zooming by mouse wheel
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.editors;
 
@@ -42,6 +43,10 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -255,6 +260,48 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		// Speed up scrolling when using a wheel mouse
 		ScrollBar vBar = sc.getVerticalBar();
 		vBar.setIncrement(10);
+				
+		pv.addMouseWheelListener(new MouseWheelListener() {
+			int lastY = 0;
+			
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				
+				if((e.stateMask & SWT.CTRL) > 0) {
+					Point o = getOrigin();
+					Point oldSize = pv.getSize();
+					pv.setZoomFactor(Math.max(pv.getZoomFactor() + (float)e.count/10, 0));
+					int mx = Math.round((float)pv.getSize().x * ((float)e.x / oldSize.x)) - (e.x-o.x);
+					int my = Math.round((float)pv.getSize().y * ((float)e.y / oldSize.y)) - (e.y-o.y);
+					setOrigin(mx,my);
+					return;
+				}
+
+				Point p = sc.getOrigin();
+				
+				if(lastY == p.y) {
+				
+					int height = sc.getClientArea().height;
+					int pheight = sc.getContent().getBounds().height;
+					
+					if (p.y >= pheight - height && e.count < 0) {
+	
+						//We are at the end of the page
+						if (currentPage < f.getNumPages()) {
+							showPage(currentPage + 1);
+							setOrigin(sc.getOrigin().x, 0);
+						}
+					} else if (p.y <= 0 && e.count > 0) {
+						//We are at the top of the page
+						if (currentPage > 1) {
+							showPage(currentPage - 1);
+							setOrigin(sc.getOrigin().x, pheight);
+						}
+					}
+				}
+				lastY = p.y;
+			}
+		});
 
 		pv.addKeyListener(new KeyAdapter() {
 
