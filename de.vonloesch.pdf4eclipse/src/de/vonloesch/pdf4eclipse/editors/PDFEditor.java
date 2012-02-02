@@ -44,6 +44,8 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -262,8 +264,6 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		vBar.setIncrement(10);
 				
 		pv.addMouseWheelListener(new MouseWheelListener() {
-			int lastY = 0;
-			
 			@Override
 			public void mouseScrolled(MouseEvent e) {
 				
@@ -279,29 +279,60 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 				Point p = sc.getOrigin();
 				
-				if(lastY == p.y) {
+				int height = sc.getClientArea().height;
+				int pheight = sc.getContent().getBounds().height;
 				
-					int height = sc.getClientArea().height;
-					int pheight = sc.getContent().getBounds().height;
-					
-					if (p.y >= pheight - height && e.count < 0) {
-	
-						//We are at the end of the page
-						if (currentPage < f.getNumPages()) {
-							showPage(currentPage + 1);
-							setOrigin(sc.getOrigin().x, 0);
-						}
-					} else if (p.y <= 0 && e.count > 0) {
-						//We are at the top of the page
-						if (currentPage > 1) {
-							showPage(currentPage - 1);
-							setOrigin(sc.getOrigin().x, pheight);
-						}
+				if (p.y >= pheight - height && e.count < 0) {
+
+					//We are at the end of the page
+					if (currentPage < f.getNumPages()) {
+						showPage(currentPage + 1);
+						setOrigin(sc.getOrigin().x, 0);
+					}
+				} else if (p.y <= 0 && e.count > 0) {
+					//We are at the top of the page
+					if (currentPage > 1) {
+						showPage(currentPage - 1);
+						setOrigin(sc.getOrigin().x, pheight);
 					}
 				}
-				lastY = p.y;
 			}
 		});
+		
+		pv.addMouseListener(new MouseListener() {
+			
+			Point start;
+			MouseMoveListener mml = new MouseMoveListener() {
+				
+				@Override
+				public void mouseMove(MouseEvent e) {
+					if((e.stateMask & SWT.BUTTON2) == 0) {
+						pv.removeMouseMoveListener(this);
+						return;
+					}
+					Point o = sc.getOrigin();
+					sc.setOrigin(o.x-(e.x-start.x), o.y-(e.y-start.y));
+				}
+			};
+			
+			@Override
+			public void mouseUp(MouseEvent e) {
+				if(e.button != 2)
+					return;
+				pv.removeMouseMoveListener(mml);
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {
+				if(e.button != 2)
+					return;
+				start = new Point(e.x, e.y);
+				pv.addMouseMoveListener(mml);
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {}
+		});		
 
 		pv.addKeyListener(new KeyAdapter() {
 
