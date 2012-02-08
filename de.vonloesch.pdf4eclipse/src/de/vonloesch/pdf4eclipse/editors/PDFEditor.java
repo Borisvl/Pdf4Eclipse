@@ -44,6 +44,8 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -247,8 +249,34 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	@Override
 	public void createPartControl(final Composite parent) {
-		parent.setLayout(new FillLayout());
-		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
+		layout.verticalSpacing= 0;
+		composite.setLayout(layout);
+		
+		// a composite used to show controls
+		Composite menuC = new Composite(composite, SWT.NONE);
+		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		menuC.setLayoutData(layoutData);
+		layout = new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
+		layout.verticalSpacing= 0;
+		layoutData.exclude= true;
+		menuC.setLayout(layout);
+		
+		sc = new ScrolledComposite(composite, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		FillLayout fillLayout= new FillLayout(SWT.VERTICAL);
+		fillLayout.marginHeight= 0;
+		fillLayout.marginWidth= 0;
+		fillLayout.spacing= 0;
+		sc.setLayout(fillLayout);
+		
 		pv = new PDFPageViewer(sc, this);
 		//pv = new PDFPageViewerAWT(sc, this);
 		sc.setContent(pv);

@@ -1,0 +1,116 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.vonloesch.pdf4eclipse</groupId>
+  <artifactId>parent</artifactId>
+  <version>1.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+	<modules>
+		<module>de.vonloesch.pdf4eclipse.help</module>
+		<module>de.vonloesch.pdf4eclipse</module>
+		<module>de.vonloesch.pdf4eclipse.feature</module>
+		<!-- p2 repository for updates -->
+		<module>de.vonloesch.pdf4eclipse.p2repository</module>
+	</modules>
+
+
+	<prerequisites>
+		<maven>3.0</maven>
+	</prerequisites>
+
+	<!-- Minimum tycho version build work with -->
+	<properties>
+		<!-- http://maven.apache.org/general.html#encoding-warning  -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<tycho-version>0.14.0-SNAPSHOT</tycho-version>
+	</properties>
+
+  <repositories>
+    <!-- configure p2 repository to resolve against -->
+    <repository>
+      <id>indigo</id>
+      <layout>p2</layout>
+      <url>http://download.eclipse.org/releases/indigo</url>
+    </repository>
+  </repositories>
+
+	<build>
+		<plugins>
+			<!-- enable tycho build extension -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+            <plugin>
+		        <groupId>org.eclipse.tycho</groupId>
+	        	<artifactId>tycho-compiler-plugin</artifactId>
+	        	<version>${tycho-version}</version>
+			    <configuration>
+			    	<source>1.6</source>
+			    	<target>1.5</target>
+					<encoding>UTF-8</encoding>
+			    </configuration>
+			</plugin>
+			<plugin>
+		        <groupId>org.eclipse.tycho</groupId>
+	        	<artifactId>tycho-packaging-plugin</artifactId>
+	        	<version>${tycho-version}</version>
+			    <configuration>
+				    <archive>
+				    	<addMavenDescriptor>false</addMavenDescriptor>
+				    </archive>
+			    </configuration>
+			</plugin>
+    			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<!-- configure the p2 target environments for multi-platform build -->
+					<environments>
+
+						<!-- Linux -->
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+
+						<!-- Windows -->
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+
+						<!-- Mac -->
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+
+					</environments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
