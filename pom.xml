@@ -23,7 +23,7 @@
 		<!-- http://maven.apache.org/general.html#encoding-warning  -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<tycho-version>0.14.0-SNAPSHOT</tycho-version>
+		<tycho-version>0.14.0</tycho-version>
 	</properties>
 
   <repositories>
