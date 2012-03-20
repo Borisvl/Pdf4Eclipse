@@ -23,6 +23,10 @@ public class Messages extends NLS {
 	public static String PDFEditor_SynctexMsg2;
 	public static String PDFEditor_SynctexMsg3;
 	public static String PDFEditor_SynctexMsg4;
+	public static String StatusLinePageSelector_ButtonFirst;
+	public static String StatusLinePageSelector_ButtonLast;
+	public static String StatusLinePageSelector_ButtonNext;
+	public static String StatusLinePageSelector_ButtonPrevious;
 	public static String StatusLinePageSelector_errorMsg1;
 	public static String StatusLinePageSelector_errorMsg2;
 	public static String StatusLinePageSelector_tooltip;
