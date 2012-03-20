@@ -29,6 +29,7 @@ import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IContributionItem;
@@ -221,7 +222,8 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				if (!(getEditorInput() instanceof IFileEditorInput)) return;
 
 				final IFile currentfile = ((IFileEditorInput) getEditorInput()).getFile();
-				if (event.getDelta().findMember(currentfile.getFullPath()) != null){
+				final IResourceDelta delta = event.getDelta().findMember(currentfile.getFullPath());
+				if (delta != null && (delta.getKind() & IResourceDelta.REMOVED) == 0) {
 					readPdfFile();
 					final OutlineNode n = f.getOutline();
 					Display.getDefault().asyncExec(new Runnable() {										
