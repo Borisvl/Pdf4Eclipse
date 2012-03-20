@@ -33,6 +33,10 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.BadLocationException;
@@ -48,12 +52,12 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseWheelListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -71,7 +75,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-
 import com.sun.pdfview.OutlineNode;
 import com.sun.pdfview.PDFDestination;
 import com.sun.pdfview.PDFFile;
@@ -82,6 +85,7 @@ import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
+import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
 import de.vonloesch.synctex.SimpleSynctexParser;
 
 /**
@@ -90,7 +94,7 @@ import de.vonloesch.synctex.SimpleSynctexParser;
  *
  */
 public class PDFEditor extends EditorPart implements IResourceChangeListener, 
-	INavigationLocationProvider, IPageChangeListener{
+	INavigationLocationProvider, IPageChangeListener, IPreferenceChangeListener{
 
 	public static final String ID = "de.vonloesch.pdf4eclipse.editors.PDFEditor"; //$NON-NLS-1$
 	public static final String CONTEXT_ID = "PDFViewer.editors.contextid"; //$NON-NLS-1$
@@ -100,6 +104,10 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	public static final int FORWARD_SEARCH_FILE_NOT_FOUND = -2;
 	public static final int FORWARD_SEARCH_POS_NOT_FOUND = -3;
 	public static final int FORWARD_SEARCH_UNKNOWN_ERROR = -4;
+	
+	private static final float MOUSE_ZOOMFACTOR = 0.2f;
+	
+	private static final int SCROLLING_WAIT_TIME = 200;
 
 	static final String PDFPOSITION_ID = "PDFPosition"; //$NON-NLS-1$
 	
@@ -113,6 +121,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	private int pageNumbers;
 	private PDFFileOutline outline;
 	private StatusLinePageSelector position;
+	
+	private Listener mouseWheelPageListener;
+	private boolean isListeningForMouseWheel;
 
 	public PDFEditor() {
 		super();
@@ -128,7 +139,10 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
 		if (position != null) position.removePageChangeListener(this);
-
+		
+        IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
+		prefs.removePreferenceChangeListener(this);
+		
 		buf = null;
 		f = null;
 		pv = null;
@@ -265,42 +279,70 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		ScrollBar vBar = sc.getVerticalBar();
 		vBar.setIncrement(10);
 				
-		pv.addMouseWheelListener(new MouseWheelListener() {
+		
+		isListeningForMouseWheel = false;
+		mouseWheelPageListener = new Listener() {
+			
+			//last time the page number changed due to a scrolling event
+			long lastTime;
+			
 			@Override
-			public void mouseScrolled(MouseEvent e) {
+			public void handleEvent(Event e) {
+				long time = e.time & 0xFFFFFFFFL;
 				
-				if((e.stateMask & SWT.CTRL) > 0) {
-					Point o = getOrigin();
-					Point oldSize = pv.getSize();
-					pv.setZoomFactor(Math.max(pv.getZoomFactor() + (float)e.count/10, 0));
-					int mx = Math.round((float)pv.getSize().x * ((float)e.x / oldSize.x)) - (e.x-o.x);
-					int my = Math.round((float)pv.getSize().y * ((float)e.y / oldSize.y)) - (e.y-o.y);
-					setOrigin(mx,my);
+				//If a scrolling event occurs within a very short period of time
+				//after the last page change discard it. This avoids "overscrolling"
+				//the beginning of the next page
+				if (time - lastTime < SCROLLING_WAIT_TIME) {
+					e.doit = false;
 					return;
 				}
-
+				
 				Point p = sc.getOrigin();
 				
 				int height = sc.getClientArea().height;
 				int pheight = sc.getContent().getBounds().height;
-				
-				if (p.y >= pheight - height && e.count < 0) {
 
+				if (p.y >= pheight - height && e.count < 0) {
 					//We are at the end of the page
 					if (currentPage < f.getNumPages()) {
 						showPage(currentPage + 1);
 						setOrigin(sc.getOrigin().x, 0);
+						e.doit = false;
+						lastTime = time;
 					}
 				} else if (p.y <= 0 && e.count > 0) {
 					//We are at the top of the page
 					if (currentPage > 1) {
 						showPage(currentPage - 1);
 						setOrigin(sc.getOrigin().x, pheight);
+						e.doit = false;
+						lastTime = time;
 					}
 				}
+				
+			}
+		};
+		
+		//Add zooming by using mouse wheel and ctrl key (contributed by MeisterYeti)
+		pv.addMouseWheelListener(new MouseWheelListener() {
+
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				if((e.stateMask & SWT.CTRL) > 0) {
+					Point o = getOrigin();
+					Point oldSize = pv.getSize();
+					pv.setZoomFactor(Math.max(pv.getZoomFactor() + MOUSE_ZOOMFACTOR*(float)e.count/10, 0));
+					int mx = Math.round((float)pv.getSize().x * ((float)e.x / oldSize.x)) - (e.x-o.x);
+					int my = Math.round((float)pv.getSize().y * ((float)e.y / oldSize.y)) - (e.y-o.y);
+					setOrigin(mx,my);
+					return;
+				}
+				
 			}
 		});
 		
+		//Add panning of page using middle mouse button (contributed by MeisterYeti)
 		pv.addMouseListener(new MouseListener() {
 			
 			Point start;
@@ -432,8 +474,38 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (f != null) {
 			showPage(currentPage);
 		}
+		
+        IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
+        
+		prefs.addPreferenceChangeListener(this);
+		
+		if (prefs.getBoolean(PreferenceConstants.PSEUDO_CONTINUOUS_SCROLLING, true)) {
+			pv.addListener(SWT.MouseWheel, mouseWheelPageListener);
+			isListeningForMouseWheel = true;
+		}
+
 		initKeyBindingContext();
 	}
+
+    @Override
+    public void preferenceChange(PreferenceChangeEvent event) {
+    	//Check whether "Pseudo continuous scrolling" was changed
+    	if (PreferenceConstants.PSEUDO_CONTINUOUS_SCROLLING.equals(event.getKey())) {
+    		
+    		boolean newValue = Boolean.parseBoolean((String)(event.getNewValue()));
+    		//I do not know why this happens, but getNewValue() returns null instead of true
+    		if (event.getNewValue() == null) newValue = true;
+    		
+    		if (isListeningForMouseWheel && newValue == false) {
+    			pv.removeListener(SWT.MouseWheel, mouseWheelPageListener);
+    			isListeningForMouseWheel = false;
+    		}
+    		else if (!isListeningForMouseWheel && newValue == true) {
+    			pv.addListener(SWT.MouseWheel, mouseWheelPageListener);
+    			isListeningForMouseWheel = true;
+    		}
+    	}
+    }
 
 	private void initKeyBindingContext() {
 		final IContextService service = (IContextService)

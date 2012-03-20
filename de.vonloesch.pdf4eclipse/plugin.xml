@@ -213,5 +213,19 @@
             parentId="org.eclipse.ui.contexts.window">
       </context>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="de.vonloesch.pdf4eclipse.preferences.MainPreferencePage"
+            id="de.vonloesch.pdf4eclipse.preferences.MainPreferencePage"
+            name="Pdf4Eclipse">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="de.vonloesch.pdf4eclipse.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>
