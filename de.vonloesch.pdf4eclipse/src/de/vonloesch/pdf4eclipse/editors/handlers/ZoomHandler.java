@@ -38,6 +38,8 @@ public class ZoomHandler extends AbstractHandler {
 
 		IEditorPart editor = HandlerUtil.getActiveEditor(event);
 		if (editor == null) return null;
+		
+		if (!(editor instanceof PDFEditor)) return null;
 
 		String msg = event.getParameter(PARAMATER);
 		if (msg == null) return null;
