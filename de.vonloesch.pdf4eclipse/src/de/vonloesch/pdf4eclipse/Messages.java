@@ -14,6 +14,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "de.vonloesch.pdf4eclipse.messages"; //$NON-NLS-1$
+	public static String MainPreferencePage_PseudoContScroll;
+	public static String MainPreferencePage_Summary;
 	public static String PDFEditor_ErrorMsg1;
 	public static String PDFEditor_ErrorMsg2;
 	public static String PDFEditor_ErrorMsg3;

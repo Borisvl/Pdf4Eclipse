@@ -9,11 +9,22 @@
  *     Boris von Loesch - initial API and implementation
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.preferences;
+/*******************************************************************************
+ * Copyright (c) 2012 Boris von Loesch.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Boris von Loesch - initial API and implementation
+ ******************************************************************************/
 
 import org.eclipse.jface.preference.*;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
 import de.vonloesch.pdf4eclipse.Activator;
+import de.vonloesch.pdf4eclipse.Messages;
 
 /**
  * This class represents a preference page that
@@ -36,7 +47,7 @@ public class MainPreferencePage
 	public MainPreferencePage() {
 		super(GRID);
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		setDescription("General settings for viewing PDF documents");
+		setDescription(Messages.MainPreferencePage_Summary);
 	}
 	
 	/**
@@ -49,7 +60,7 @@ public class MainPreferencePage
 		addField(
 			new BooleanFieldEditor(
 				PreferenceConstants.PSEUDO_CONTINUOUS_SCROLLING,
-				"&Enable pseudo continuous scrolling",
+				Messages.MainPreferencePage_PseudoContScroll,
 				getFieldEditorParent()));
 	}
 
