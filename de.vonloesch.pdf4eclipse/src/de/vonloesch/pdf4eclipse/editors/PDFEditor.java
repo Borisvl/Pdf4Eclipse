@@ -52,6 +52,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseWheelListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -125,6 +126,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	private Listener mouseWheelPageListener;
 	private boolean isListeningForMouseWheel;
 
+	private Cursor cursorHand;
+	private Cursor cursorArrow;
+	
 	public PDFEditor() {
 		super();
 	}
@@ -136,6 +140,8 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (sc != null) sc.dispose();
 		if (pv != null) pv.dispose();
 		if (outline != null) outline.dispose();
+		if (cursorArrow != null) cursorArrow.dispose();
+		if (cursorHand != null) cursorHand.dispose();
 		
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
 		if (position != null) position.removePageChangeListener(this);
@@ -270,6 +276,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	@Override
 	public void createPartControl(final Composite parent) {
+		cursorHand = new Cursor(Display.getDefault(), SWT.CURSOR_HAND);
+		cursorArrow = new Cursor(Display.getDefault(), SWT.CURSOR_ARROW);
+		
 		parent.setLayout(new FillLayout());
 		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		pv = new PDFPageViewer(sc, this);
@@ -352,6 +361,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				public void mouseMove(MouseEvent e) {
 					if((e.stateMask & SWT.BUTTON2) == 0) {
 						pv.removeMouseMoveListener(this);
+						pv.setCursor(cursorArrow);
 						return;
 					}
 					Point o = sc.getOrigin();
@@ -364,6 +374,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				if(e.button != 2)
 					return;
 				pv.removeMouseMoveListener(mml);
+				pv.setCursor(cursorArrow);
 			}
 			
 			@Override
@@ -372,6 +383,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 					return;
 				start = new Point(e.x, e.y);
 				pv.addMouseMoveListener(mml);
+				pv.setCursor(cursorHand);
 			}
 			
 			@Override
