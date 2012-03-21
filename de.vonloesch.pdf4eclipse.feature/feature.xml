@@ -2,7 +2,7 @@
 <feature
       id="de.vonloesch.pdf4eclipse"
       label="PDF4Eclipse"
-      version="1.0.1"
+      version="1.0.2"
       provider-name="Boris von Loesch">
 
    <description url="http://borisvl.github.com/Pdf4Eclipse">
@@ -10,7 +10,7 @@
    </description>
 
    <copyright>
-      Copyright (c) 2011 Boris von Loesch.
+      Copyright (c) 2011,2012 Boris von Loesch.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Eclipse Public License
 v1.0
