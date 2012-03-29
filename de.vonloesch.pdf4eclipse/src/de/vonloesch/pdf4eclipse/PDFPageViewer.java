@@ -318,9 +318,11 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	currentImage = page.getImage(sz.y, sz.x);
 
 
+    	long time = System.currentTimeMillis();
     	if (swtImage != null) swtImage.dispose();
     	swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)currentImage));
-
+    	System.out.println(System.currentTimeMillis() - time);
+    	
     	if (resize) {
     		//TODO: Non-exact size of JPedal
     		//Resize triggers repaint

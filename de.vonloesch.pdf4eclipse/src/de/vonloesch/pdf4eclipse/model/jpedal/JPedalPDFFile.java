@@ -14,13 +14,13 @@ public class JPedalPDFFile implements IPDFFile {
 	File input;
 	PdfDecoder decoder;
 	int pageNumbers;
-	
+
 	public JPedalPDFFile(File f) throws IOException {
 		input = f;
 		decoder = new PdfDecoder(false);
 		reload();
 	}
-	
+
 	@Override
 	public int getNumPages() {
 		return pageNumbers;
@@ -48,4 +48,9 @@ public class JPedalPDFFile implements IPDFFile {
 		return new JPedalPDFPage(decoder, pageNr);
 	}
 
+	@Override
+	public void close() {
+		decoder.closePdfFile();
+		decoder.dispose();
+	}
 }

@@ -56,4 +56,9 @@ public class SunPDFFile implements IPDFFile {
 	public IPDFPage getPage(int pageNr) {
 		return new SunPDFPage(pdfFile.getPage(pageNr));
 	}
+	
+	@Override
+	public void close() {
+		pdfFile = null;
+	}
 }

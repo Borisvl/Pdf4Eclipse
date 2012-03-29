@@ -15,4 +15,6 @@ public interface IPDFFile {
 	void reload() throws IOException;
 	
 	IPDFPage getPage(int pageNr);
+	
+	void close();
 }

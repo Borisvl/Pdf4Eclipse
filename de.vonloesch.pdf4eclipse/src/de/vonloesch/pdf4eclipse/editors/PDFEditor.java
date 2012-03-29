@@ -111,7 +111,6 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	
 	public PDFPageViewer pv;
 	private File file;
-	private ByteBuffer buf;
 
 	private IPDFFile f;
 	private ScrolledComposite sc;
@@ -145,7 +144,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
         IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
 		prefs.removePreferenceChangeListener(this);
 		
-		buf = null;
+		if (f != null) f.close();
 		f = null;
 		pv = null;
 	}
@@ -218,7 +217,8 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				final IFile currentfile = ((IFileEditorInput) getEditorInput()).getFile();
 				final IResourceDelta delta = event.getDelta().findMember(currentfile.getFullPath());
 				if (delta != null && (delta.getKind() & IResourceDelta.REMOVED) == 0) {
-					readPdfFile();
+					//readPdfFile();
+					f.reload();
 					final IOutlineNode n = f.getOutline();
 					Display.getDefault().asyncExec(new Runnable() {										
 						@Override
@@ -231,10 +231,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 						}
 					});
 				}
-			} catch (PartInitException e) {
+			} 
+			/*catch (PartInitException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IOException e) {
+			}*/ 
+			catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
