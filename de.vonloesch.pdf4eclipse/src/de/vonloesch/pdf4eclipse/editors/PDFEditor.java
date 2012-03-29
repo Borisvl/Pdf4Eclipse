@@ -85,6 +85,9 @@ import com.sun.pdfview.PDFPage;
 import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
+import de.vonloesch.pdf4eclipse.model.IPDFFile;
+import de.vonloesch.pdf4eclipse.model.IPDFPage;
+import de.vonloesch.pdf4eclipse.model.SunPDFFile;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
 import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
 import de.vonloesch.synctex.SimpleSynctexParser;
@@ -116,10 +119,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	private File file;
 	private ByteBuffer buf;
 
-	private PDFFile f;
+	private IPDFFile f;
 	private ScrolledComposite sc;
 	int currentPage;
-	private int pageNumbers;
 	private PDFFileOutline outline;
 	private StatusLinePageSelector position;
 	
@@ -184,37 +186,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 		f = null;
 		try {
-			long len = file.length();
-			if (len > Integer.MAX_VALUE) {
-				throw new IOException(Messages.PDFEditor_ErrorMsg2 + file.getName());
-			}
-			int contentLength = (int) len;
-			/*if (len <= MAX_DIRECT_FILESIZE) {
-				istr = new FileInputStream(file);
-				byte[] byteBuf = new byte[contentLength];
-				int offset = 0;
-				int read = 0;
-				while (read >= 0 && offset < contentLength) {
-					read = istr.read(byteBuf, offset, contentLength - offset);
-					if (read > 0) {
-						offset += read;
-					}
-				}
-				buf = ByteBuffer.wrap(byteBuf);
-			}
-			else {*/
-			RandomAccessFile ff = new RandomAccessFile(file, "r"); //$NON-NLS-1$
-			buf = ByteBuffer.allocateDirect((int) contentLength);
-			FileChannel c = ff.getChannel();
-			c.read(buf);
-			//Mapped buffers lock the file, hence Latex could not rebuild it
-			//at least under Windows OS
-			//buf = c.map(MapMode.READ_ONLY, 0, len);
-			c.close();
-			ff.close();
-			//}
-			f = new PDFFile(buf);	  
-			pageNumbers = f.getNumPages();
+			f = new SunPDFFile(file);
 		} catch (FileNotFoundException fnfe) {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {
@@ -252,7 +224,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				final IResourceDelta delta = event.getDelta().findMember(currentfile.getFullPath());
 				if (delta != null && (delta.getKind() & IResourceDelta.REMOVED) == 0) {
 					readPdfFile();
-					final OutlineNode n = f.getOutline();
+					final OutlineNode n = (OutlineNode) f.getOutline();
 					Display.getDefault().asyncExec(new Runnable() {										
 						@Override
 						public void run() {
@@ -459,7 +431,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 					setOrigin(sc.getOrigin().x, 0);
 				}
 				else if (e.keyCode == SWT.END) {
-					showPage(pageNumbers);
+					showPage(f.getNumPages());
 					setOrigin(sc.getOrigin().x, pheight);
 				}	
 
@@ -573,11 +545,11 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * 		{@link FORWARD_SEARCH_POS_NOT_FOUND}, {@link FORWARD_SEARCH_UNKNOWN_ERROR}
 	 */
 	public int forwardSearch(String file, int lineNr) {
-		File f = getSyncTeXFile();
-		if (f == null) return FORWARD_SEARCH_NO_SYNCTEX;
+		File syncTeXFile = getSyncTeXFile();
+		if (syncTeXFile == null) return FORWARD_SEARCH_NO_SYNCTEX;
 		try {
 			//FIXME: Create a job for this
-			SimpleSynctexParser p = createSimpleSynctexParser(f);
+			SimpleSynctexParser p = createSimpleSynctexParser(syncTeXFile);
 			//System.out.println("Start Forward search");
 			p.setForwardSearchInformation(file, lineNr);
 			p.startForward();
@@ -587,7 +559,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			if (result == null) return FORWARD_SEARCH_FILE_NOT_FOUND;
 
 			int page = (int) Math.round(result[0]);
-			if (page > pageNumbers || page < 1) return FORWARD_SEARCH_UNKNOWN_ERROR;
+			if (page > f.getNumPages() || page < 1) return FORWARD_SEARCH_UNKNOWN_ERROR;
 			showPage(page);
 			pv.highlight(result[1], result[2], result[3], result[4]);
 			Rectangle2D re = pv.convertPDF2ImageCoord(new Rectangle((int)Math.round(result[1]), 
@@ -667,7 +639,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	}
 
-	private void showPage (PDFObject page) {
+	/*private void showPage (PDFObject page) {
 		try {	
 			int pageNr = f.getPageNumber(page)+1;
 			if (pageNr < 1) pageNr = 1;
@@ -679,12 +651,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		} catch (IOException e) {
 			System.err.println(Messages.PDFEditor_ErrorMsg5);
 		}
-	}
+	}*/
 
 	public void showPage(int pageNr) {
 		if (pageNr < 1) pageNr = 1;
-		if (pageNr > pageNumbers) pageNr = pageNumbers;
-		PDFPage page = f.getPage(pageNr);
+		if (pageNr > f.getNumPages()) pageNr = f.getNumPages();
+		IPDFPage page = f.getPage(pageNr);
 		currentPage = pageNr;
 		pv.showPage(page);
 		updateStatusLine();
@@ -701,7 +673,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * Shows the given page and reveals the destination
 	 * @param dest
 	 */
-	public void gotoAction(PDFDestination dest){
+/*	public void gotoAction(PDFDestination dest){
 		PDFObject page = dest.getPage();
 		if (page == null) {
 			return;
@@ -719,14 +691,14 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
 
 		wpage.getNavigationHistory().markLocation(this);
-	}
+	}*/
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class required) {
 		if (IContentOutlinePage.class.equals(required)) {
 			if (outline == null) {
 				try {
-					OutlineNode n = f.getOutline();
+					OutlineNode n = (OutlineNode)f.getOutline();
 					if (n == null) return null;
 					outline = new PDFFileOutline(this);
 					outline.setInput(n);
@@ -752,7 +724,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	}
 
 	private void updateStatusLine() {
-		position.setPageInfo(currentPage, pageNumbers);
+		position.setPageInfo(currentPage, f.getNumPages());
 	}
 
 	public void fitHorizontal() {

@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.1.0",
  org.eclipse.ui.views,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
- de.vonloesch.pdf4eclipse.help;bundle-version="1.0.0";resolution:=optional
+ de.vonloesch.pdf4eclipse.help;bundle-version="1.0.0";resolution:=optional,
+ org.jpedal.pdf;bundle-version="4.73.26"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,

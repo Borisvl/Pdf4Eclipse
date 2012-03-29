@@ -67,7 +67,7 @@ public class PDFFileOutline extends ContentOutlinePage {
 					if (action instanceof GoToAction) {
 						PDFDestination dest = ((GoToAction) action).getDestination();
 						if (dest == null) return;
-						editor.gotoAction(dest);
+						//editor.gotoAction(dest);
 					}
 				}			       
 			}
