@@ -1,4 +1,4 @@
-package de.vonloesch.pdf4eclipse.model;
+package de.vonloesch.pdf4eclipse.model.sun;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,9 @@ import java.nio.channels.FileChannel;
 import com.sun.pdfview.PDFFile;
 
 import de.vonloesch.pdf4eclipse.Messages;
+import de.vonloesch.pdf4eclipse.model.IOutlineNode;
+import de.vonloesch.pdf4eclipse.model.IPDFFile;
+import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 public class SunPDFFile implements IPDFFile {
 
@@ -27,8 +30,9 @@ public class SunPDFFile implements IPDFFile {
 	}
 
 	@Override
-	public Object getOutline() throws IOException{
-		return pdfFile.getOutline();
+	public IOutlineNode getOutline() throws IOException{
+		if (pdfFile.getOutline() == null) return null;
+		return new SunOutlineNode(pdfFile.getOutline());
 	}
 	
 	@Override

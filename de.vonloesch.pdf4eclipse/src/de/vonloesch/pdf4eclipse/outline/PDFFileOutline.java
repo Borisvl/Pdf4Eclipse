@@ -10,22 +10,14 @@
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.outline;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
-
-import com.sun.pdfview.OutlineNode;
-import com.sun.pdfview.PDFDestination;
-import com.sun.pdfview.action.GoToAction;
-import com.sun.pdfview.action.PDFAction;
-
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
+import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 
 /**
  * A simple outline, which directly uses the outline of the pdf file.
@@ -35,7 +27,7 @@ import de.vonloesch.pdf4eclipse.editors.PDFEditor;
  */
 public class PDFFileOutline extends ContentOutlinePage {
 	
-	private OutlineNode input;
+	private IOutlineNode input;
 	private PDFEditor editor;
 	
 	public PDFFileOutline(PDFEditor editor) {
@@ -59,7 +51,7 @@ public class PDFFileOutline extends ContentOutlinePage {
 				if(event.getSelection().isEmpty()) {
 					return;
 				}
-				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+				/*IStructuredSelection selection = (IStructuredSelection)event.getSelection();
 				for (Iterator iterator = selection.iterator(); iterator.hasNext();) {
 					OutlineNode domain = (OutlineNode) iterator.next();
 
@@ -69,12 +61,12 @@ public class PDFFileOutline extends ContentOutlinePage {
 						if (dest == null) return;
 						//editor.gotoAction(dest);
 					}
-				}			       
+				}	*/		       
 			}
 		});
 	}
 
-	public void setInput(OutlineNode n) {
+	public void setInput(IOutlineNode n) {
 		input = n;
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {

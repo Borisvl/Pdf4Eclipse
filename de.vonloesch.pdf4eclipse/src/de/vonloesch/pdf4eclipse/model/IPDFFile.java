@@ -10,7 +10,7 @@ public interface IPDFFile {
 	 */
 	int getNumPages();
 	
-	Object getOutline()  throws IOException;
+	IOutlineNode getOutline()  throws IOException;
 	
 	void reload() throws IOException;
 	

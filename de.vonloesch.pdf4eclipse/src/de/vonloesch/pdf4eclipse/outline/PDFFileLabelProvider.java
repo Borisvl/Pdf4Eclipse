@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 
-import com.sun.pdfview.OutlineNode;
+import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 
 public class PDFFileLabelProvider implements ILabelProvider {
 
@@ -50,9 +50,9 @@ public class PDFFileLabelProvider implements ILabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof OutlineNode) {
-			OutlineNode n = (OutlineNode) element;
-			return n.toString();
+		if (element instanceof IOutlineNode) {
+			IOutlineNode n = (IOutlineNode) element;
+			return n.getLabel();
 		}
 		return null;
 	}

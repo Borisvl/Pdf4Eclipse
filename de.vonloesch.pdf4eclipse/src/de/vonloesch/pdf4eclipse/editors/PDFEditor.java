@@ -20,9 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.core.filesystem.EFS;
@@ -76,18 +74,13 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-import com.sun.pdfview.OutlineNode;
-import com.sun.pdfview.PDFDestination;
-import com.sun.pdfview.PDFFile;
-import com.sun.pdfview.PDFObject;
-import com.sun.pdfview.PDFPage;
-
 import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
+import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
-import de.vonloesch.pdf4eclipse.model.SunPDFFile;
+import de.vonloesch.pdf4eclipse.model.sun.SunPDFFile;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
 import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
 import de.vonloesch.synctex.SimpleSynctexParser;
@@ -224,7 +217,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				final IResourceDelta delta = event.getDelta().findMember(currentfile.getFullPath());
 				if (delta != null && (delta.getKind() & IResourceDelta.REMOVED) == 0) {
 					readPdfFile();
-					final OutlineNode n = (OutlineNode) f.getOutline();
+					final IOutlineNode n = f.getOutline();
 					Display.getDefault().asyncExec(new Runnable() {										
 						@Override
 						public void run() {
@@ -698,7 +691,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (IContentOutlinePage.class.equals(required)) {
 			if (outline == null) {
 				try {
-					OutlineNode n = (OutlineNode)f.getOutline();
+					IOutlineNode n = f.getOutline();
 					if (n == null) return null;
 					outline = new PDFFileOutline(this);
 					outline.setInput(n);

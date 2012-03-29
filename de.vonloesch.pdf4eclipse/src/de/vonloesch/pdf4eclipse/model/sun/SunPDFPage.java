@@ -1,4 +1,4 @@
-package de.vonloesch.pdf4eclipse.model;
+package de.vonloesch.pdf4eclipse.model.sun;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,6 +15,7 @@ import com.sun.pdfview.RefImage;
 import com.sun.pdfview.Watchable;
 
 import de.vonloesch.pdf4eclipse.Messages;
+import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 public class SunPDFPage implements IPDFPage {
 	
