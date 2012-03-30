@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.jpedal.PdfDecoder;
 import org.jpedal.exception.PdfException;
+import org.w3c.dom.Node;
 
 import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 import de.vonloesch.pdf4eclipse.model.IPDFFile;
@@ -28,7 +29,8 @@ public class JPedalPDFFile implements IPDFFile {
 
 	@Override
 	public IOutlineNode getOutline() throws IOException {
-		// TODO Auto-generated method stub
+		Node n = decoder.getOutlineAsXML();
+		if (n != null) return new JPedalOutlineNode(n.getFirstChild());
 		return null;
 	}
 
