@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontMappings>
+    <font>
+    	<rawFont>DEFAULT_FONT</rawFont>
+    	<sizeAdjust>-1</sizeAdjust>
+    	<mappedTo>'Times New Roman', Times, serif</mappedTo>
+    	<style></style>
+    	<weight></weight>
+    </font>
+    <font>
+        <rawFont>Helvetica-Narrow</rawFont>
+        <sizeAdjust>-2</sizeAdjust>
+        <mappedTo>Impact</mappedTo>
+    </font>
+    <font>
+        <rawFont>Helvetica-Narrow-Bold</rawFont>
+        <sizeAdjust>-2</sizeAdjust>
+        <mappedTo>Impact</mappedTo>
+	<weight>bold</weight>
+    </font>
+    <font>
+    	<rawFont>GillSans</rawFont>
+    	<mappedTo>Tahoma, Geneva, sans-serif</mappedTo>
+    	<sizeAdjust>-1</sizeAdjust></font>
+    <font>
+    	<rawFont>CataneoBT</rawFont>
+    	<mappedTo>'Times New Roman', Times, serif</mappedTo>
+    	<sizeAdjust>-2</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>HelveticaNeue</rawFont>
+    	<mappedTo>Helvetica, Arial, sans-serif</mappedTo>
+    	<sizeAdjust>-2</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>HelveticaNeue</rawFont>
+    	<mappedTo>Helvetica, Arial, sans-serif</mappedTo>
+    	<sizeAdjust>-2</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>Frutiger</rawFont>
+    	<mappedTo>Tahoma, Geneva, sans-serif</mappedTo>
+    	<sizeAdjust>-1</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>Interstate</rawFont>
+    	<mappedTo>Impact, Charcoal, sans-serif</mappedTo>
+    	<sizeAdjust>-1</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>DemosEF</rawFont>
+    	<mappedTo>'Times New Roman', Times, serif</mappedTo>
+    </font>
+    <font>
+    	<rawFont>RaleighBT</rawFont>
+    	<mappedTo>'Palatino Linotype', 'Book Antiqua', Palatino, serif</mappedTo>
+    	<sizeAdjust>-1</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>MyriadPro</rawFont>
+    	<mappedTo>'Trebuchet MS', Helvetica, sans-serif</mappedTo>
+    	<sizeAdjust>-2</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>MinionPro</rawFont>
+    	<mappedTo>'Palatino Linotype', 'Book Antiqua', Palatino, serif</mappedTo>
+    	<sizeAdjust>-3</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>Univers</rawFont>
+    	<mappedTo>Impact, Charcoal, sans-serif</mappedTo>
+    	<sizeAdjust>-2</sizeAdjust>
+    </font>
+    <font>
+    	<rawFont>CourierNew</rawFont>
+    	<sizeAdjust>-1</sizeAdjust>
+    </font>
+</fontMappings>
