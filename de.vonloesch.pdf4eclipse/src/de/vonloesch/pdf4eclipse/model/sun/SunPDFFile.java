@@ -32,7 +32,7 @@ public class SunPDFFile implements IPDFFile {
 	@Override
 	public IOutlineNode getOutline() throws IOException{
 		if (pdfFile.getOutline() == null) return null;
-		return new SunOutlineNode(pdfFile.getOutline());
+		return new SunOutlineNode(pdfFile.getOutline(), pdfFile);
 	}
 	
 	@Override

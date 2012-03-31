@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.core.filesystem.EFS;
@@ -73,7 +72,6 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jpedal.examples.ShowPageSize;
 
 import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
@@ -82,7 +80,6 @@ import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
-import de.vonloesch.pdf4eclipse.model.jpedal.JPedalPDFFile;
 import de.vonloesch.pdf4eclipse.model.sun.SunPDFFile;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
 import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
@@ -181,8 +178,8 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 		f = null;
 		try {
-			//f = new SunPDFFile(file);
-			f = new JPedalPDFFile(file);
+			f = new SunPDFFile(file);
+			//f = new JPedalPDFFile(file);
 		} catch (FileNotFoundException fnfe) {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {
@@ -638,20 +635,6 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	}
 
-	/*private void showPage (PDFObject page) {
-		try {	
-			int pageNr = f.getPageNumber(page)+1;
-			if (pageNr < 1) pageNr = 1;
-			if (pageNr > pageNumbers) pageNr = pageNumbers;
-			PDFPage pager = f.getPage(pageNr);
-			currentPage = pageNr;
-			pv.showPage(pager);
-			updateStatusLine();
-		} catch (IOException e) {
-			System.err.println(Messages.PDFEditor_ErrorMsg5);
-		}
-	}*/
-
 	public void showPage(IPDFPage page) {
 		currentPage = page.getPageNumber();
 		pv.showPage(page);
@@ -679,10 +662,6 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * @param dest
 	 */
 	public void gotoAction(IPDFDestination dest){
-		/*PDFObject page = dest.getPage();
-		if (page == null) {
-			return;
-		}*/
 		IPDFPage page = dest.getPage();
 		if (page == null) return;
 
@@ -700,11 +679,6 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		else {
 			setOrigin(sc.getOrigin().x, 0);			
 		}
-		/*Rectangle2D re = pv.convertPDF2ImageCoord(new Rectangle((int)Math.round(dest.getLeft()), (int)Math.round(dest.getTop()), 
-				1, 1));
-		int x = sc.getOrigin().x;
-		if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
-		setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));*/
 		wpage.getNavigationHistory().markLocation(this);
 	}
 
