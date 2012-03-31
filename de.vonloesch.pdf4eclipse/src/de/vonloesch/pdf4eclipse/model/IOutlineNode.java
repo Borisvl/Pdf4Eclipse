@@ -5,5 +5,5 @@ public interface IOutlineNode {
 	public IOutlineNode getParent();
 	public IOutlineNode[] getChildren();
 	public boolean hasChildren();
-	public Object getDestination();
+	public IPDFDestination getDestination();
 }

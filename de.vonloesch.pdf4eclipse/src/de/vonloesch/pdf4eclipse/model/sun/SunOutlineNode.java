@@ -8,6 +8,7 @@ import com.sun.pdfview.action.GoToAction;
 import com.sun.pdfview.action.PDFAction;
 
 import de.vonloesch.pdf4eclipse.model.IOutlineNode;
+import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 
 public class SunOutlineNode implements IOutlineNode{
 	
@@ -31,11 +32,11 @@ public class SunOutlineNode implements IOutlineNode{
 	}
 	
 	@Override
-	public Object getDestination() {
+	public IPDFDestination getDestination() {
 		PDFAction action = node.getAction();
 		if (action instanceof GoToAction) {
 			PDFDestination dest = ((GoToAction) action).getDestination();
-			return dest;
+			//return dest;
 		}
 		return null;
 	}

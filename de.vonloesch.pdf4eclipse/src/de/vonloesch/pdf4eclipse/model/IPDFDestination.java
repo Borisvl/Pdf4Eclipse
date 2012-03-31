@@ -1,5 +1,9 @@
 package de.vonloesch.pdf4eclipse.model;
 
-public interface IPDFDestination {
+import java.awt.geom.Rectangle2D;
 
+public interface IPDFDestination {
+	IPDFPage getPage();
+	
+	Rectangle2D getPosition();
 }

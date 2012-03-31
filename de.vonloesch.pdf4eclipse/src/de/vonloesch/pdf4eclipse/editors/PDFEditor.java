@@ -73,11 +73,13 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.jpedal.examples.ShowPageSize;
 
 import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
 import de.vonloesch.pdf4eclipse.model.IOutlineNode;
+import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 import de.vonloesch.pdf4eclipse.model.jpedal.JPedalPDFFile;
@@ -650,6 +652,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 	}*/
 
+	public void showPage(IPDFPage page) {
+		currentPage = page.getPageNumber();
+		pv.showPage(page);
+		updateStatusLine();
+	}
+	
 	public void showPage(int pageNr) {
 		if (pageNr < 1) pageNr = 1;
 		if (pageNr > f.getNumPages()) pageNr = f.getNumPages();
@@ -670,25 +678,35 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * Shows the given page and reveals the destination
 	 * @param dest
 	 */
-/*	public void gotoAction(PDFDestination dest){
-		PDFObject page = dest.getPage();
+	public void gotoAction(IPDFDestination dest){
+		/*PDFObject page = dest.getPage();
 		if (page == null) {
 			return;
-		}
+		}*/
+		IPDFPage page = dest.getPage();
+		if (page == null) return;
 
 		IWorkbenchPage wpage = getSite().getPage();
 		wpage.getNavigationHistory().markLocation(this);
 
 		showPage(page);
-
-		Rectangle2D re = pv.convertPDF2ImageCoord(new Rectangle((int)Math.round(dest.getLeft()), (int)Math.round(dest.getTop()), 
+		Rectangle2D r = dest.getPosition();
+		if (r != null) {
+			Rectangle2D re = pv.convertPDF2ImageCoord(r);
+			int x = sc.getOrigin().x;
+			if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
+			setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
+		}
+		else {
+			setOrigin(sc.getOrigin().x, 0);			
+		}
+		/*Rectangle2D re = pv.convertPDF2ImageCoord(new Rectangle((int)Math.round(dest.getLeft()), (int)Math.round(dest.getTop()), 
 				1, 1));
 		int x = sc.getOrigin().x;
 		if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
-		setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
-
+		setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));*/
 		wpage.getNavigationHistory().markLocation(this);
-	}*/
+	}
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class required) {

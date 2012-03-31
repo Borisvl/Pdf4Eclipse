@@ -30,7 +30,7 @@ public class JPedalPDFFile implements IPDFFile {
 	@Override
 	public IOutlineNode getOutline() throws IOException {
 		Node n = decoder.getOutlineAsXML();
-		if (n != null) return new JPedalOutlineNode(n.getFirstChild());
+		if (n != null) return new JPedalOutlineNode(n.getFirstChild(), decoder);
 		return null;
 	}
 
