@@ -7,14 +7,17 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import com.sun.pdfview.ImageInfo;
 import com.sun.pdfview.PDFPage;
 import com.sun.pdfview.PDFRenderer;
 import com.sun.pdfview.RefImage;
 import com.sun.pdfview.Watchable;
+import com.sun.pdfview.annotation.PDFAnnotation;
 
 import de.vonloesch.pdf4eclipse.Messages;
+import de.vonloesch.pdf4eclipse.model.IPDFAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 public class SunPDFPage implements IPDFPage {
@@ -102,5 +105,14 @@ public class SunPDFPage implements IPDFPage {
 	public float getHeight() {
 		return page.getHeight();
 	}
-
+	
+	@Override
+	public IPDFAnnotation[] getAnnotations() {
+		List<PDFAnnotation> annos = page.getAnnots(PDFAnnotation.LINK_ANNOTATION);
+		IPDFAnnotation[] annotations = new SunPDFAnnotation[annos.size()];
+		for (int i = 0; i < annotations.length; i++) {
+			annotations[i] = new SunPDFAnnotation(annos.get(i));
+		}
+		return annotations;
+	}
 }

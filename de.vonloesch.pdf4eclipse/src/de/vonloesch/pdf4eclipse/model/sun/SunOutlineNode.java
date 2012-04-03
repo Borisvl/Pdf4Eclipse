@@ -4,7 +4,6 @@ import java.util.Enumeration;
 
 import com.sun.pdfview.OutlineNode;
 import com.sun.pdfview.PDFDestination;
-import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.action.GoToAction;
 import com.sun.pdfview.action.PDFAction;
 
@@ -14,11 +13,9 @@ import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 public class SunOutlineNode implements IOutlineNode{
 	
 	private OutlineNode node;
-	private PDFFile pdfFile;
 
-	public SunOutlineNode(OutlineNode node, PDFFile pdfFile) {
+	public SunOutlineNode(OutlineNode node) {
 		assert node != null;
-		this.pdfFile = pdfFile;
 		this.node = node;
 	}
 	
@@ -28,7 +25,7 @@ public class SunOutlineNode implements IOutlineNode{
 		Enumeration<OutlineNode> te = node.children();
 		int i = 0;
 		while (te.hasMoreElements()) {
-			tn[i] = new SunOutlineNode(te.nextElement(), pdfFile);
+			tn[i] = new SunOutlineNode(te.nextElement());
 			i++;
 		}
 		return tn;
@@ -39,7 +36,7 @@ public class SunOutlineNode implements IOutlineNode{
 		PDFAction action = node.getAction();
 		if (action instanceof GoToAction) {
 			PDFDestination dest = ((GoToAction) action).getDestination();
-			return new SunPDFDestination(dest, pdfFile);
+			return new SunPDFDestination(dest);
 		}
 		return null;
 	}
@@ -53,7 +50,7 @@ public class SunOutlineNode implements IOutlineNode{
 	public IOutlineNode getParent() {
 		OutlineNode n = (OutlineNode)node.getParent();
 		if (n == null) return null;
-		return new SunOutlineNode(n, pdfFile);
+		return new SunOutlineNode(n);
 	}
 
 	@Override

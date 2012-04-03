@@ -9,21 +9,21 @@ import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
 import de.vonloesch.pdf4eclipse.model.IPDFDestination;
+import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 
 public class JPedalPDFDestination implements IPDFDestination{
 
 	PdfObject dest;
-	PdfDecoder decoder;
 
-	public JPedalPDFDestination(PdfObject o, PdfDecoder d) {
+	public JPedalPDFDestination(PdfObject o) {
 		dest = o;
-		decoder = d;
 	}
 
 	@Override
-	public IPDFPage getPage() {
+	public IPDFPage getPage(IPDFFile pdfFile) {		
+		PdfDecoder decoder = ((JPedalPDFFile) pdfFile).decoder;
 		PdfArrayIterator destIt = dest.getMixedArray(PdfDictionary.Dest);
 		String ref = dest.getObjectRefAsString();
 		int pageNr = -1;

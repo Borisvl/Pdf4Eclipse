@@ -13,9 +13,9 @@ public class JPedalOutlineNode implements IOutlineNode {
 	Node node;
 	PdfDecoder decoder;
 	
-	public JPedalOutlineNode(Node n, PdfDecoder d) {
+	public JPedalOutlineNode(Node n, PdfDecoder dec) {
 		this.node = n;
-		decoder = d;
+		this.decoder = dec;
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public class JPedalOutlineNode implements IOutlineNode {
 		String id = node.getAttributes().getNamedItem("objectRef").getTextContent();
 		PdfObject o = decoder.getOutlineData().getAobj(id);
 		if (o == null) return null;
-		return new JPedalPDFDestination(o, decoder);
+		return new JPedalPDFDestination(o);
 	}
 
 }

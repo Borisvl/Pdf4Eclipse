@@ -10,21 +10,22 @@ import com.sun.pdfview.PDFObject;
 import com.sun.pdfview.PDFPage;
 
 import de.vonloesch.pdf4eclipse.model.IPDFDestination;
+import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 
 public class SunPDFDestination implements IPDFDestination {
 
 	PDFDestination dest;
-	PDFFile pdfFile;
 
-	public SunPDFDestination(PDFDestination dest, PDFFile pdfFile) {
+	public SunPDFDestination(PDFDestination dest) {
 		this.dest = dest;
-		this.pdfFile = pdfFile;
 	}
 
 	@Override
-	public IPDFPage getPage() {
+	public IPDFPage getPage(IPDFFile ipdfFile) {
+		PDFFile pdfFile = ((SunPDFFile) ipdfFile).pdfFile;
+		
 		PDFObject o = dest.getPage();
 		if (o != null) {
 			int pageNr;

@@ -18,7 +18,7 @@ public class JPedalPDFFile implements IPDFFile {
 
 	public JPedalPDFFile(File f) throws IOException {
 		input = f;
-		decoder = new PdfDecoder(false);
+		decoder = new PdfDecoder(true);
 		reload();
 	}
 

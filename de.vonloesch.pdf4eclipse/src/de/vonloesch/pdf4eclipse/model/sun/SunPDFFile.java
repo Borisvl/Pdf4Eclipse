@@ -32,7 +32,7 @@ public class SunPDFFile implements IPDFFile {
 	@Override
 	public IOutlineNode getOutline() throws IOException{
 		if (pdfFile.getOutline() == null) return null;
-		return new SunOutlineNode(pdfFile.getOutline(), pdfFile);
+		return new SunOutlineNode(pdfFile.getOutline());
 	}
 	
 	@Override
@@ -56,6 +56,7 @@ public class SunPDFFile implements IPDFFile {
 	public IPDFPage getPage(int pageNr) {
 		return new SunPDFPage(pdfFile.getPage(pageNr));
 	}
+	
 	
 	@Override
 	public void close() {

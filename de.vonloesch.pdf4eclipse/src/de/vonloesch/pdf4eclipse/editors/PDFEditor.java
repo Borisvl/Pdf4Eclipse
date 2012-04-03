@@ -80,6 +80,7 @@ import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
+import de.vonloesch.pdf4eclipse.model.jpedal.JPedalPDFFile;
 import de.vonloesch.pdf4eclipse.model.sun.SunPDFFile;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
 import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
@@ -178,8 +179,8 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 		f = null;
 		try {
-			f = new SunPDFFile(file);
-			//f = new JPedalPDFFile(file);
+			//f = new SunPDFFile(file);
+			f = new JPedalPDFFile(file);
 		} catch (FileNotFoundException fnfe) {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {
@@ -662,7 +663,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * @param dest
 	 */
 	public void gotoAction(IPDFDestination dest){
-		IPDFPage page = dest.getPage();
+		IPDFPage page = dest.getPage(f);
 		if (page == null) return;
 
 		IWorkbenchPage wpage = getSite().getPage();

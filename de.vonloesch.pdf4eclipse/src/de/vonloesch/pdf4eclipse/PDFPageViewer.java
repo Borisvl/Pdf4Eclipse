@@ -60,6 +60,7 @@ import com.sun.pdfview.annotation.PDFAnnotation;
 
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
 import de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler;
+import de.vonloesch.pdf4eclipse.model.IPDFAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 
@@ -110,9 +111,24 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 			@Override
 			public void mouseDown(org.eclipse.swt.events.MouseEvent e) {
 				
-				/*if (e.button != 1) return;
+				if (e.button != 1) return;
 				
-				List<PDFAnnotation> annos = getPage().getAnnots(PDFAnnotation.LINK_ANNOTATION);
+				IPDFAnnotation[] annos = getPage().getAnnotations();
+            	for (final IPDFAnnotation a : annos) {
+            		Rectangle2D r = convertPDF2ImageCoord(a.getPosition());
+            		if (r.contains(e.x, e.y)) {
+            			if (a.getDestination() != null) {	
+            				Display.getDefault().asyncExec(new Runnable() {
+            					@Override
+            					public void run() {
+            						editor.gotoAction(a.getDestination());
+            					}
+            				});
+            				return;
+            			}
+            		}
+            	}
+				/*List<PDFAnnotation> annos = getPage().getAnnots(PDFAnnotation.LINK_ANNOTATION);
             	for (PDFAnnotation a : annos) {
             		LinkAnnotation aa = (LinkAnnotation) a;
             		Rectangle2D r = convertPDF2ImageCoord(aa.getRect());
@@ -387,14 +403,14 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             	
             	if (swtImage != null) g.drawImage(swtImage, offx, offy);
 
-            	/*if (highlightLinks) {
-            		List<PDFAnnotation> anno = currentPage.getAnnots(PDFAnnotation.LINK_ANNOTATION);
+            	if (highlightLinks) {
+            		IPDFAnnotation[] anno = currentPage.getAnnotations();
             		g.setForeground(display.getSystemColor(SWT.COLOR_RED));
-            		for (PDFAnnotation a : anno) {
-            			Rectangle r = getRectangle(convertPDF2ImageCoord(a.getRect()));
+            		for (IPDFAnnotation a : anno) {
+            			Rectangle r = getRectangle(convertPDF2ImageCoord(a.getPosition()));
             			g.drawRectangle(r);
             		}
-            	}*/
+            	}
             	//Draw highlight frame
             	if (highlight != null) {
                 	g.setForeground(display.getSystemColor(SWT.COLOR_BLUE));
