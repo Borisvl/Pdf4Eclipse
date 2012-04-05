@@ -60,7 +60,8 @@ import com.sun.pdfview.annotation.PDFAnnotation;
 
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
 import de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler;
-import de.vonloesch.pdf4eclipse.model.IPDFAnnotation;
+import de.vonloesch.pdf4eclipse.model.IPDFDestination;
+import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 
@@ -113,8 +114,8 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 				
 				if (e.button != 1) return;
 				
-				IPDFAnnotation[] annos = getPage().getAnnotations();
-            	for (final IPDFAnnotation a : annos) {
+				IPDFLinkAnnotation[] annos = getPage().getAnnotations();
+            	for (final IPDFLinkAnnotation a : annos) {
             		Rectangle2D r = convertPDF2ImageCoord(a.getPosition());
             		if (r.contains(e.x, e.y)) {
             			if (a.getDestination() != null) {	
@@ -404,9 +405,9 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             	if (swtImage != null) g.drawImage(swtImage, offx, offy);
 
             	if (highlightLinks) {
-            		IPDFAnnotation[] anno = currentPage.getAnnotations();
+            		IPDFLinkAnnotation[] anno = currentPage.getAnnotations();
             		g.setForeground(display.getSystemColor(SWT.COLOR_RED));
-            		for (IPDFAnnotation a : anno) {
+            		for (IPDFLinkAnnotation a : anno) {
             			Rectangle r = getRectangle(convertPDF2ImageCoord(a.getPosition()));
             			g.drawRectangle(r);
             		}

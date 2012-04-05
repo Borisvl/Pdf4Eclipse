@@ -62,4 +62,8 @@ public class SunPDFFile implements IPDFFile {
 	public void close() {
 		pdfFile = null;
 	}
+	
+	public PDFFile getInternalPDFFile() {
+		return pdfFile;
+	}
 }

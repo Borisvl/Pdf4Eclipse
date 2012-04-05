@@ -17,7 +17,7 @@ import com.sun.pdfview.Watchable;
 import com.sun.pdfview.annotation.PDFAnnotation;
 
 import de.vonloesch.pdf4eclipse.Messages;
-import de.vonloesch.pdf4eclipse.model.IPDFAnnotation;
+import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 public class SunPDFPage implements IPDFPage {
@@ -107,11 +107,11 @@ public class SunPDFPage implements IPDFPage {
 	}
 	
 	@Override
-	public IPDFAnnotation[] getAnnotations() {
+	public IPDFLinkAnnotation[] getAnnotations() {
 		List<PDFAnnotation> annos = page.getAnnots(PDFAnnotation.LINK_ANNOTATION);
-		IPDFAnnotation[] annotations = new SunPDFAnnotation[annos.size()];
+		IPDFLinkAnnotation[] annotations = new SunPDFLinkAnnotation[annos.size()];
 		for (int i = 0; i < annotations.length; i++) {
-			annotations[i] = new SunPDFAnnotation(annos.get(i));
+			annotations[i] = new SunPDFLinkAnnotation(annos.get(i));
 		}
 		return annotations;
 	}

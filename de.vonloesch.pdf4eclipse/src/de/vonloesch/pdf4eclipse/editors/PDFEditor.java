@@ -20,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.core.filesystem.EFS;
@@ -36,8 +38,10 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.viewers.AcceptAllFilter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -56,6 +60,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -65,6 +70,7 @@ import org.eclipse.ui.INavigationLocation;
 import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -73,6 +79,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import de.vonloesch.pdf4eclipse.Activator;
 import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
@@ -80,6 +87,7 @@ import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 import de.vonloesch.pdf4eclipse.model.IPDFFile;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
+import de.vonloesch.pdf4eclipse.model.PDFFactory;
 import de.vonloesch.pdf4eclipse.model.jpedal.JPedalPDFFile;
 import de.vonloesch.pdf4eclipse.model.sun.SunPDFFile;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
@@ -179,8 +187,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 		f = null;
 		try {
-			//f = new SunPDFFile(file);
-			f = new JPedalPDFFile(file);
+			f = PDFFactory.openPDFFile(file, PDFFactory.STRATEGY_SUN_JPEDAL);
 		} catch (FileNotFoundException fnfe) {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {
@@ -662,25 +669,43 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * Shows the given page and reveals the destination
 	 * @param dest
 	 */
-	public void gotoAction(IPDFDestination dest){
-		IPDFPage page = dest.getPage(f);
-		if (page == null) return;
+	public void gotoAction(IPDFDestination dest) {
+		if (dest.getType() == IPDFDestination.TYPE_GOTO) {
+			IPDFPage page = dest.getPage(f);
+			if (page == null) return;
 
-		IWorkbenchPage wpage = getSite().getPage();
-		wpage.getNavigationHistory().markLocation(this);
+			IWorkbenchPage wpage = getSite().getPage();
+			wpage.getNavigationHistory().markLocation(this);
 
-		showPage(page);
-		Rectangle2D r = dest.getPosition();
-		if (r != null) {
-			Rectangle2D re = pv.convertPDF2ImageCoord(r);
-			int x = sc.getOrigin().x;
-			if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
-			setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
+			showPage(page);
+			Rectangle2D r = dest.getPosition();
+			if (r != null) {
+				Rectangle2D re = pv.convertPDF2ImageCoord(r);
+				int x = sc.getOrigin().x;
+				if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
+				setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
+			}
+			else {
+				setOrigin(sc.getOrigin().x, 0);			
+			}
+			wpage.getNavigationHistory().markLocation(this);
+		} 
+		else if (dest.getType() == IPDFDestination.TYPE_URL) {
+			String url = dest.getURL();
+			if (url.toLowerCase().indexOf("://") < 0) { //$NON-NLS-1$
+				url = "http://" + url; //$NON-NLS-1$
+			}
+			try {
+				PlatformUI.getWorkbench().getBrowserSupport()
+				.createBrowser("PDFBrowser").openURL(new URL(url));
+			}
+			catch (PartInitException e) {
+				Activator.log("Problem opening browser", e);
+			}
+			catch (MalformedURLException e) {
+				MessageDialog.openError(this.getSite().getShell(), "No valid url", e.getMessage());
+			} //$NON-NLS-1$
 		}
-		else {
-			setOrigin(sc.getOrigin().x, 0);			
-		}
-		wpage.getNavigationHistory().markLocation(this);
 	}
 
 	@Override

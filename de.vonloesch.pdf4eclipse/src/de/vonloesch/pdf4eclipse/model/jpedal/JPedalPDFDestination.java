@@ -16,13 +16,23 @@ import de.vonloesch.pdf4eclipse.model.IPDFPage;
 public class JPedalPDFDestination implements IPDFDestination{
 
 	PdfObject dest;
-
+	String url;
+	int type;
+	
 	public JPedalPDFDestination(PdfObject o) {
 		dest = o;
+		type = IPDFDestination.TYPE_GOTO;
+	}
+	
+	public JPedalPDFDestination(String url) {
+		this.url = url;
+		type = IPDFDestination.TYPE_URL;
 	}
 
 	@Override
-	public IPDFPage getPage(IPDFFile pdfFile) {		
+	public IPDFPage getPage(IPDFFile pdfFile) {
+		if (type == IPDFDestination.TYPE_URL) return null;
+		
 		PdfDecoder decoder = ((JPedalPDFFile) pdfFile).decoder;
 		PdfArrayIterator destIt = dest.getMixedArray(PdfDictionary.Dest);
 		String ref = dest.getObjectRefAsString();
@@ -58,6 +68,8 @@ public class JPedalPDFDestination implements IPDFDestination{
 
 	@Override
 	public Rectangle2D getPosition() {
+		if (type == IPDFDestination.TYPE_URL) return null;
+		
 		PdfArrayIterator destIt = dest.getMixedArray(PdfDictionary.Dest);
 		//Try to get position
 		if (destIt != null && destIt.getTokenCount() > 1) {
@@ -75,5 +87,14 @@ public class JPedalPDFDestination implements IPDFDestination{
 		}
 		return null;
 	}
+	
+	@Override
+	public int getType() {
+		return type;
+	}
 
+	@Override
+	public String getURL() {
+		return url;
+	}
 }

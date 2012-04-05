@@ -1,6 +1,5 @@
 package de.vonloesch.pdf4eclipse.model.jpedal;
 
-import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import org.jpedal.PdfDecoder;
@@ -10,17 +9,17 @@ import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 import org.jpedal.objects.raw.PdfObject;
 
-import de.vonloesch.pdf4eclipse.model.IPDFAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFDestination;
+import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 
 
-public class JPedalPDFAnnotation implements IPDFAnnotation{
+public class JPedalPDFLinkAnnotation implements IPDFLinkAnnotation{
 
 	FormObject annotObj;
 	PdfDecoder decoder;
 	Rectangle2D r;
 	
-	public JPedalPDFAnnotation (FormObject annotObj, PdfDecoder decoder) {
+	public JPedalPDFLinkAnnotation (FormObject annotObj, PdfDecoder decoder) {
 		this.annotObj = annotObj;
 		this.decoder = decoder;
 	}
@@ -48,8 +47,7 @@ public class JPedalPDFAnnotation implements IPDFAnnotation{
         if (aData == null) aData = annotObj;
         if (aData.getNameAsConstant(PdfDictionary.S) == PdfDictionary.URI) {
         	String text = aData.getTextStreamValue(PdfDictionary.URI);
-        	System.out.println("URL: "+text);
-        	return null;
+        	return new JPedalPDFDestination(text);
         }
         
         PdfArrayIterator destIt = aData.getMixedArray(PdfDictionary.Dest);

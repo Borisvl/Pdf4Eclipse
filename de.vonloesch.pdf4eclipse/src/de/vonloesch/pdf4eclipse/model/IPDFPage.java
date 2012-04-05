@@ -27,5 +27,5 @@ public interface IPDFPage {
 	
 	public Rectangle2D pdf2ImageCoordinates(Rectangle2D r);
 	
-	public IPDFAnnotation[] getAnnotations();
+	public IPDFLinkAnnotation[] getAnnotations();
 }

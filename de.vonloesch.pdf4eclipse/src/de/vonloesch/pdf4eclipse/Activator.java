@@ -10,6 +10,7 @@
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse;
 
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -67,5 +68,23 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+	
+	/**
+	 * Writes a message to the log.
+	 * @param message
+	 * @param severity One of <tt>Status.INFO, Status.WARNING, Status.ERROR</tt>  
+	 */
+	public static void log(String message, int severity) {
+		plugin.getLog().log(new Status(severity, PLUGIN_ID, message));
+	}
+	
+	/**
+	 * Writes an error message to the log.
+	 * @param message
+	 * @param throwable
+	 */
+	public static void log(String message, Throwable throwable) {
+		plugin.getLog().log(new Status(Status.ERROR, PLUGIN_ID, message, throwable));
 	}
 }

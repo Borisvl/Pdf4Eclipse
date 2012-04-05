@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.jpedal.PdfDecoder;
 import org.jpedal.exception.PdfException;
+import org.jpedal.objects.raw.PdfDictionary;
 import org.w3c.dom.Node;
 
 import de.vonloesch.pdf4eclipse.model.IOutlineNode;
@@ -18,7 +19,7 @@ public class JPedalPDFFile implements IPDFFile {
 
 	public JPedalPDFFile(File f) throws IOException {
 		input = f;
-		decoder = new PdfDecoder(true);
+		decoder = new PdfDecoder(false);
 		reload();
 	}
 
@@ -54,5 +55,9 @@ public class JPedalPDFFile implements IPDFFile {
 	public void close() {
 		decoder.closePdfFile();
 		decoder.dispose();
+	}
+	
+	public PdfDecoder getInternalDecoder() {
+		return decoder;
 	}
 }

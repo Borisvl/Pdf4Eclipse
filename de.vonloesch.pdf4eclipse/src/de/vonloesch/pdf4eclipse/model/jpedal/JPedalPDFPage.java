@@ -13,7 +13,7 @@ import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 
-import de.vonloesch.pdf4eclipse.model.IPDFAnnotation;
+import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 public class JPedalPDFPage implements IPDFPage{
@@ -28,7 +28,7 @@ public class JPedalPDFPage implements IPDFPage{
 
 	int imgWidth;
 	int imgHeight;
-	IPDFAnnotation[] annotations;
+	IPDFLinkAnnotation[] annotations;
 
 	public JPedalPDFPage(PdfDecoder decoder, int pageNr) {
 		this.decoder = decoder;
@@ -101,10 +101,10 @@ public class JPedalPDFPage implements IPDFPage{
 	}
 
 	@Override
-	public IPDFAnnotation[] getAnnotations() {
+	public IPDFLinkAnnotation[] getAnnotations() {
 		if (annotations != null) return annotations;
 
-		List<IPDFAnnotation> annotationsList = new LinkedList<IPDFAnnotation>();
+		List<IPDFLinkAnnotation> annotationsList = new LinkedList<IPDFLinkAnnotation>();
 		PdfArrayIterator annotListForPage = decoder.getFormRenderer().getAnnotsOnPage(pageNr);
 
 		if (annotListForPage != null && annotListForPage.getTokenCount() > 0) { //can have empty lists
@@ -124,13 +124,13 @@ public class JPedalPDFPage implements IPDFPage{
 						int subtype = annotObj.getParameterConstant(PdfDictionary.Subtype);
 
 						if (subtype == PdfDictionary.Link) {
-							annotationsList.add(new JPedalPDFAnnotation(annotObj, decoder));        	
+							annotationsList.add(new JPedalPDFLinkAnnotation(annotObj, decoder));        	
 						}
 					}
 				}
 			}
 		}
-		annotations = annotationsList.toArray(new JPedalPDFAnnotation[0]);
+		annotations = annotationsList.toArray(new JPedalPDFLinkAnnotation[0]);
 		return annotations;
 	}
 }
