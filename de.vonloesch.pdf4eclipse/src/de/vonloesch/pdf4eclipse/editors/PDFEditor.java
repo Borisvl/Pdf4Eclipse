@@ -183,7 +183,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 		f = null;
 		try {
-			f = PDFFactory.openPDFFile(file, PDFFactory.STRATEGY_SUN_JPEDAL);
+			IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
+			int r = prefs.getInt(PreferenceConstants.PDF_RENDERER, PDFFactory.STRATEGY_SUN_JPEDAL);
+			f = PDFFactory.openPDFFile(file, r);
 		} catch (FileNotFoundException fnfe) {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {

@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import de.vonloesch.pdf4eclipse.Activator;
+import de.vonloesch.pdf4eclipse.model.PDFFactory;
 
 /**
  * Class used to initialize default preference values.
@@ -29,6 +30,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.PSEUDO_CONTINUOUS_SCROLLING, true);
+		store.setDefault(PreferenceConstants.PDF_RENDERER, PDFFactory.STRATEGY_SUN_JPEDAL);
 	}
 
 }
