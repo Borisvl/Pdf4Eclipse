@@ -13,6 +13,7 @@ import org.jpedal.objects.raw.FormObject;
 import org.jpedal.objects.raw.PdfArrayIterator;
 import org.jpedal.objects.raw.PdfDictionary;
 
+import de.vonloesch.pdf4eclipse.Activator;
 import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
@@ -58,8 +59,7 @@ public class JPedalPDFPage implements IPDFPage{
 			imgHeight = img.getHeight();
 			return img;
 		} catch (PdfException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Activator.log("Error while decoding page", e);
 		}
 		return null;
 	}
@@ -133,4 +133,5 @@ public class JPedalPDFPage implements IPDFPage{
 		annotations = annotationsList.toArray(new JPedalPDFLinkAnnotation[0]);
 		return annotations;
 	}
+	
 }

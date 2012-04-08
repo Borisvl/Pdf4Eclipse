@@ -2,7 +2,6 @@ package de.vonloesch.pdf4eclipse.model;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 public interface IPDFPage {
 	/**

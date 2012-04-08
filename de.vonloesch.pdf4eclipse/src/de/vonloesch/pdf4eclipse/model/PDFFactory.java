@@ -5,10 +5,6 @@ import java.io.IOException;
 
 import org.jpedal.PdfDecoder;
 import org.jpedal.objects.raw.PdfDictionary;
-import org.jpedal.parser.PdfStreamDecoder;
-
-import com.sun.pdfview.PDFFile;
-import com.sun.pdfview.PDFPage;
 
 import de.vonloesch.pdf4eclipse.model.jpedal.JPedalPDFFile;
 import de.vonloesch.pdf4eclipse.model.sun.SunPDFFile;
@@ -26,6 +22,15 @@ public class PDFFactory {
 		// Just to hide the default constructor
 	}
 	
+	/**
+	 * Returns a pdf file. If strategy is set to <tt>STRATEGY_SUN_JPEDAL</tt> then try to
+	 * open the file with the sun renderer but use jpedal when CIDType0 fonts are used 
+	 * in the pdf.
+	 * @param file
+	 * @param strategy 
+	 * @return
+	 * @throws IOException
+	 */
 	public static IPDFFile openPDFFile (File file, int strategy) throws IOException {
 		if (instance == null) instance = new PDFFactory();
 		if (strategy == STRATEGY_SUN) {
@@ -37,14 +42,24 @@ public class PDFFactory {
 			if (strategy == STRATEGY_JPEDAL) return f2;
 			
 			PdfDecoder decoder = f2.getInternalDecoder();
-			decoder.setRenderMode(decoder.RENDERTEXT);
+			decoder.setRenderMode(PdfDecoder.TEXT);
+
+			boolean hasCIDFont = false;
 			try {
-				decoder.decodePage(1);
+				//long t = System.currentTimeMillis();
+				for (int i=1; i <= decoder.getPageCount(); i++) {
+					decoder.decodePage(i);
+					if (decoder.getInfo(PdfDictionary.Font).indexOf("CIDFontType0") > 0) {
+						hasCIDFont = true;
+						break;
+					}
+				}
+				//System.out.println("Detection time: "+(System.currentTimeMillis() - t));
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 			}
-			if (decoder.getInfo(PdfDictionary.Font).indexOf("CIDFontType0") > 0) {
+			if (hasCIDFont) {
 				decoder.setRenderMode(7);
 				return f2;
 			}

@@ -10,11 +10,8 @@
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Double;
 import java.awt.image.BufferedImage;
@@ -22,10 +19,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
-import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -44,23 +37,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-
-
-import com.sun.pdfview.ImageInfo;
-import com.sun.pdfview.PDFPage;
-import com.sun.pdfview.PDFRenderer;
-import com.sun.pdfview.RefImage;
-import com.sun.pdfview.Watchable;
-import com.sun.pdfview.action.GoToAction;
-import com.sun.pdfview.action.UriAction;
-import com.sun.pdfview.annotation.LinkAnnotation;
-import com.sun.pdfview.annotation.PDFAnnotation;
 
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
 import de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler;
-import de.vonloesch.pdf4eclipse.model.IPDFDestination;
 import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
@@ -93,7 +72,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     
     private float zoomFactor;
     
-    private org.eclipse.swt.graphics.Image swtImage;
+    //private org.eclipse.swt.graphics.Image swtImage;
 
     /**
      * Create a new PagePanel.
@@ -101,7 +80,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     public PDFPageViewer(Composite parent, final PDFEditor editor) {
         //super(parent, SWT.NO_BACKGROUND|SWT.NO_REDRAW_RESIZE);
     	//super(parent, SWT.EMBEDDED | SWT.NO_BACKGROUND | SWT.NO_REDRAW_RESIZE);
-    	super(parent, SWT.NO_BACKGROUND);
+    	super(parent, SWT.NO_BACKGROUND | SWT.NO_MERGE_PAINTS);
 
     	this.addMouseListener(new MouseListener() {
 			
@@ -325,23 +304,24 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 
     	Point sz = getSize();
 
+    	if (sz.x == 0 || sz.y == 0) return;
+    	currentImage = page.getImage(newH, newW);
+
+    	newW = currentImage.getWidth(null);
+    	newH = currentImage.getHeight(null);
     	if (sz.x != newW || sz.y != newH) {
     		sz.x = newW;
     		sz.y = newH;
     		resize = true;
     	}
 
-    	if (sz.x == 0 || sz.y == 0) return;
-    	currentImage = page.getImage(sz.y, sz.x);
 
-
-    	long time = System.currentTimeMillis();
-    	if (swtImage != null) swtImage.dispose();
-    	swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)currentImage));
-    	System.out.println(System.currentTimeMillis() - time);
+    	//long time = System.currentTimeMillis();
+    	//if (swtImage != null) swtImage.dispose();
+    	//swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)currentImage));
+    	//System.out.println(System.currentTimeMillis() - time);
     	
     	if (resize) {
-    		//TODO: Non-exact size of JPedal
     		//Resize triggers repaint
     		setSize(currentImage.getWidth(null), currentImage.getHeight(null));
     		//setSize(Math.round(zoomFactor*page.getWidth()), Math.round(zoomFactor*page.getHeight()));
@@ -394,7 +374,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             // draw the image
             int imwid = currentImage.getWidth(null);
             int imhgt = currentImage.getHeight(null);
-
+            
             // draw it centered within the panel
             offx = (sz.x - imwid) / 2;
             offy = (sz.y - imhgt) / 2;
@@ -402,7 +382,13 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             if ((imwid == sz.x && imhgt <= sz.y) ||
                     (imhgt == sz.y && imwid <= sz.x)) {
             	
-            	if (swtImage != null) g.drawImage(swtImage, offx, offy);
+            	Image temp = new BufferedImage(event.width, event.height, BufferedImage.TYPE_4BYTE_ABGR);
+            	temp.getGraphics().drawImage(currentImage, 0, 0, event.width, event.height, event.x, event.y, 
+            			event.x + event.width, event.y + event.height, null);
+            	org.eclipse.swt.graphics.Image swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)temp));
+            	//if (swtImage != null) g.drawImage(swtImage, offx, offy);
+            	g.drawImage(swtImage, event.x, event.y);
+            	swtImage.dispose();
 
             	if (highlightLinks) {
             		IPDFLinkAnnotation[] anno = currentPage.getAnnotations();
@@ -452,7 +438,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	super.dispose();
 
     	currentImage.flush();
-    	if (swtImage != null) swtImage.dispose();
+    	//if (swtImage != null) swtImage.dispose();
 		currentImage = null;
     	
     	//IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);

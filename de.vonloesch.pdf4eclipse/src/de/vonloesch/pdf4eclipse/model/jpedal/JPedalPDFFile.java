@@ -5,7 +5,8 @@ import java.io.IOException;
 
 import org.jpedal.PdfDecoder;
 import org.jpedal.exception.PdfException;
-import org.jpedal.objects.raw.PdfDictionary;
+import org.jpedal.fonts.FontMappings;
+import org.jpedal.fonts.tt.TTGlyph;
 import org.w3c.dom.Node;
 
 import de.vonloesch.pdf4eclipse.model.IOutlineNode;
@@ -20,6 +21,8 @@ public class JPedalPDFFile implements IPDFFile {
 	public JPedalPDFFile(File f) throws IOException {
 		input = f;
 		decoder = new PdfDecoder(false);
+		FontMappings.setFontReplacements();
+		TTGlyph.useHinting = false;
 		reload();
 	}
 
