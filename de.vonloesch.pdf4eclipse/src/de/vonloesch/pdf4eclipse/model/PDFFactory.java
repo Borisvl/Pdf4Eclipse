@@ -29,6 +29,8 @@ public class PDFFactory {
 	public final static int STRATEGY_JPEDAL = 2;
 	public final static int STRATEGY_SUN_JPEDAL = 3;
 	
+	private final static int MAX_PAGES_CHECK = 20;
+	
 	protected PDFFactory() {
 		// Just to hide the default constructor
 	}
@@ -58,7 +60,7 @@ public class PDFFactory {
 			boolean hasCIDFont = false;
 			try {
 				//long t = System.currentTimeMillis();
-				for (int i=1; i <= decoder.getPageCount(); i++) {
+				for (int i=1; i <= decoder.getPageCount() && i <= MAX_PAGES_CHECK; i++) {
 					decoder.decodePage(i);
 					if (decoder.getInfo(PdfDictionary.Font).indexOf("CIDFontType0") > 0) {
 						hasCIDFont = true;
