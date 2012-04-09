@@ -58,6 +58,13 @@
 		a complete integration of SyncTeX, which allows forward and inverse search in pdf files.
 		This makes it a perfect viewer for documents created with 
     <a href="http://texlipse.sf.net">TeXlipse</a>.</p>
+    <p>
+    To render the pdf documents Pdf4Eclipse uses two different libraries: 
+    A <a href="https://github.com/Borisvl/PDFrenderer">fork</a> 
+    of <a href="http://java.net/projects/pdf-renderer">SUN's pdfrenderer</a> and 
+    the LPGL version of the <a href="http://www.jpedal.org">JPedal library</a>.
+    To change the renderer use Pdf4Eclipse's preferences.
+    </p>
     <h2>Screenshot</h2>
     <p>
     The following screenshot shows a side-by-side view of a LaTeX document and
@@ -69,7 +76,7 @@
     </p>
     <h2>Features</h2>
     <ul>
-    <li>Support of a wide range of pdf documents</li>
+    <li>Two different pdf renderers to support of a wide range of pdf documents</li>
     <li>Bookmarks can be shown in the outline view</li>
     <li>Uses the look-and-feel of Eclipse</li>
     <li>Supports links in pdfs</li>
@@ -94,6 +101,12 @@
     </p>
     <h2>Changelog</h2>
     <ul>
+    <li>1.1.0 (09.04.2012)
+	<ul>
+	<li>Besides Sun's pdf renderer this version adds also JPedal's pdf renderer to support a 
+  larger number of pdf documents</li>
+  <li>Some refactorings</li>
+	</ul>
     <li>1.0.2 (21.03.2012)
 	<ul>
 	<li>Add "pseudo continuous scrolling", panning and zooming per mouse wheel (thanks to MeisterYeti)</li>
