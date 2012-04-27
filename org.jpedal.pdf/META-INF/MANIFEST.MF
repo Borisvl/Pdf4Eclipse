@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JPedal Pdf library
 Bundle-SymbolicName: org.jpedal.pdf
-Bundle-Version: 4.73.26
+Bundle-Version: 4.74.27
 Bundle-ClassPath: .,
  lib/jbig2.jar
 Export-Package: com.idrsolutions.pdf.acroforms.xfa,
