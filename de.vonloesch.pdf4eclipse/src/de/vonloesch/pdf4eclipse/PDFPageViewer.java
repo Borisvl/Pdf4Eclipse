@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Boris von Loesch - initial API and implementation
+ *     Robert Bamler - auto-trimming of page margins
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse;
 
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
+import de.vonloesch.pdf4eclipse.editors.handlers.ToggleAutoTrimHandler;
 import de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler;
 import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
@@ -54,8 +56,6 @@ import de.vonloesch.pdf4eclipse.model.IPDFPage;
  *
  */
 public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceChangeListener{
-    private static final boolean autoTrimOn = true;
-
     /** The image of the rendered PDF page being displayed */
     private Image currentImage;
     
@@ -74,6 +74,11 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     private Display display;
     
     private float zoomFactor;
+    
+    private boolean autoTrimOn = true;
+    private Point trimOffset = new Point(0, 0);
+    private float horizontalTrimFactor = 1.0f;
+    private float verticalTrimFactor = 1.0f;
     
     //private org.eclipse.swt.graphics.Image swtImage;
 
@@ -181,6 +186,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 		prefs.addPreferenceChangeListener(this);
 		
 		highlightLinks = prefs.getBoolean(ToggleLinkHighlightHandler.PREF_LINKHIGHTLIGHT_ID, true);
+		autoTrimOn = prefs.getBoolean(ToggleAutoTrimHandler.PREF_AUTOTRIM_ID, false);
     }
 
     
@@ -403,6 +409,12 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	trimy1 = Math.max(0, trimy1-margin);
     	trimy2 = Math.min(origh, trimy2+margin);
     	
+    	// remember trim margins
+    	trimOffset .x = trimx1;
+    	trimOffset.y = trimy1;
+    	horizontalTrimFactor = 1.0f * (trimx2-trimx1) / origw;
+    	verticalTrimFactor = 1.0f * (trimy2-trimy1) / origh;
+    	
     	// crop image
     	currentImage = img.getSubimage(trimx1, trimy1, trimx2-trimx1, trimy2-trimy1);
     }
@@ -412,11 +424,14 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     }
     
     public Rectangle2D convertPDF2ImageCoord(Rectangle2D r) {
-    	return currentPage.pdf2ImageCoordinates(r);
+    	Rectangle2D coord = currentPage.pdf2ImageCoordinates(r);
+    	coord.setRect(coord.getX()-trimOffset.x, coord.getY()-trimOffset.y, coord.getWidth(), coord.getHeight());
+    	return coord;
     }
     
     public Rectangle2D convertImage2PDFCoord(Rectangle2D r) {
-    	return currentPage.image2PdfCoordinates(r);
+    	java.awt.Rectangle coord = new java.awt.Rectangle((int)r.getX()+trimOffset.x, (int)r.getY()+trimOffset.y, (int)r.getWidth(), (int)r.getHeight());
+    	return currentPage.image2PdfCoordinates(coord);
     }
     
     /**
@@ -501,6 +516,15 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	if (ToggleLinkHighlightHandler.PREF_LINKHIGHTLIGHT_ID.equals(event.getKey())) {
     		highlightLinks = Boolean.parseBoolean((String)(event.getNewValue()));
     		redraw();
+    	} else if (ToggleAutoTrimHandler.PREF_AUTOTRIM_ID.equals(event.getKey())) {
+    		autoTrimOn = Boolean.parseBoolean((String)(event.getNewValue()));
+    		if (!autoTrimOn) {
+    			trimOffset.x = 0;
+    			trimOffset.y = 0;
+    			horizontalTrimFactor = 1.0f;
+    			verticalTrimFactor = 1.0f;
+    		}
+    		showPage(currentPage);
     	}
     }
     
@@ -523,4 +547,14 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
     	prefs.removePreferenceChangeListener(this);
     }
+
+
+	public float getHorizontalTrimFactor() {
+		return horizontalTrimFactor;
+	}
+
+
+	public float getVerticalTrimFactor() {
+		return verticalTrimFactor;
+	}
 }
