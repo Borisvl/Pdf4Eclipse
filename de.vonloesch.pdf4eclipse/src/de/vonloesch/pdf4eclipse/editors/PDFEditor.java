@@ -8,6 +8,7 @@
  * Contributors:
  *     Boris von Loesch - initial API and implementation
  *     MeisterYeti - pseudo-continuous scrolling and zooming by mouse wheel
+ *     Robert Bamler - auto-trimming of page margins
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.editors;
 
@@ -742,12 +743,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	public void fitHorizontal() {
 		int w = sc.getClientArea().width;
-		pv.setZoomFactor((1.0f*w)/pv.getPage().getWidth());
+		pv.setZoomFactor((1.0f/pv.getHorizontalTrimFactor()*w)/pv.getPage().getWidth());
 	}
 
 	public void fit() {
-		float w = 1.f * sc.getClientArea().width;
-		float h = 1.f * sc.getClientArea().height;
+		float w = 1.f/pv.getHorizontalTrimFactor() * sc.getClientArea().width;
+		float h = 1.f/pv.getVerticalTrimFactor() * sc.getClientArea().height;
 		float pw = pv.getPage().getWidth();
 		float ph = pv.getPage().getHeight();
 		if (w/pw < h/ph) pv.setZoomFactor(w/pw);
