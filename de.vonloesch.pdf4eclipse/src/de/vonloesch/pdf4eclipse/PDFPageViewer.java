@@ -308,8 +308,9 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	highlight = null;
 
     	boolean resize = false;
-    	int newW = Math.round(zoomFactor*page.getWidth());
-    	int newH = Math.round(zoomFactor*page.getHeight());
+    	// always round _down_ so that the fit-to-screen commands work properly
+    	int newW = (int) (zoomFactor*page.getWidth());
+    	int newH = (int) (zoomFactor*page.getHeight());
 
     	Point sz = getSize();
 
