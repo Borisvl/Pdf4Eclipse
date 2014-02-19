@@ -44,6 +44,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -471,6 +473,19 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 
 		initKeyBindingContext();
+		sc.addControlListener(new ControlListener() {
+
+			@Override
+			public void controlResized(ControlEvent e) {
+				try {
+					fitHorizontal();
+				} catch (Exception ex) {}
+			}
+
+			@Override
+			public void controlMoved(ControlEvent e) {
+			}
+		});
 	}
 
     @Override
