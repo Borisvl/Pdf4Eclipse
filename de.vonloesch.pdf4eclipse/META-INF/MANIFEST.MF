@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: de.vonloesch.pdf4Eclipse;singleton:=true
+Bundle-SymbolicName: de.vonloesch.pdf4eclipse;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: de.vonloesch.pdf4eclipse.Activator
 Require-Bundle: org.eclipse.ui;bundle-version="3.1.0",

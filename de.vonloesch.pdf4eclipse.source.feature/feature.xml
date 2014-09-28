@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="de.vonloesch.pdf4eclipse.feature"
+      id="de.vonloesch.pdf4eclipse.source.feature"
       label="PDF4Eclipse"
       version="1.1.0.qualifier"
       provider-name="Boris von Loesch">
@@ -125,20 +125,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </requires>
 
    <plugin
-         id="de.vonloesch.pdf4eclipse"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="de.vonloesch.pdf4eclipse.help"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.jpedal.pdf"
+         id="de.vonloesch.pdf4eclipse.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
