@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="de.vonloesch.pdf4eclipse.feature"
-      label="PDF4Eclipse"
+      label="PDF4Eclipse feature"
       version="1.1.0.qualifier"
       provider-name="Boris von Loesch">
 
