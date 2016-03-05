@@ -20,3 +20,4 @@ Bundle-ClassPath: .,
  lib/jbig2.jar,
  lib/PDFrenderer.jar
 Bundle-Vendor: %Bundle-Vendor
+Export-Package: de.vonloesch.synctex

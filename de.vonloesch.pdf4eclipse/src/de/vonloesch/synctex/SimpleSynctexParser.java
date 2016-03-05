@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Boris von Loesch - initial API and implementation
+ *     Andreas Turban   - Added interface ISynctexParser
  ******************************************************************************/
 package de.vonloesch.synctex;
 
@@ -28,7 +29,7 @@ import java.util.TreeMap;
  * @author Boris von Loesch
  *
  */
-public class SimpleSynctexParser {
+class SimpleSynctexParser implements ISynctexParser {
 	public static final int SEARCH_FORWARD = 1;
 	public static final int SEARCH_REVERSE = 2;
 	
@@ -43,8 +44,8 @@ public class SimpleSynctexParser {
 	Map<Integer, String> fileMap;
 		
 	//Forward search information
-	public String sourceFilePath;
-	public int sourceLineNr;
+	private String sourceFilePath;
+	private int sourceLineNr;
 
 	//helper (forward search)
 	private int smallerLineNr;
@@ -464,5 +465,15 @@ public class SimpleSynctexParser {
 		if (endPos < 0) endPos = line.length();
 		nextPos = endPos;
 		return line.substring(pos + 1, endPos);
+	}
+
+	@Override
+	public String getSourceFilePath() {
+	return sourceFilePath;
+	}
+
+	@Override
+	public int getSourceLineNr() {
+		return sourceLineNr;
 	}
 }
