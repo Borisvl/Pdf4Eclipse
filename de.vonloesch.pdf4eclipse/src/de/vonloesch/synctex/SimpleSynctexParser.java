@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import org.eclipse.core.resources.IProject;
+
 /**
  * A simple parser for SyncTeX files. Allows forward and reverse search.
  * More information about SyncTeX and the official C-implementation can be found
@@ -83,7 +85,17 @@ class SimpleSynctexParser implements ISynctexParser {
 		dist = Double.MAX_VALUE;
 	}
 	
+	
+	
 	/**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setEclipseProject(IProject eclipseProject) {
+        
+    }
+
+    /**
 	 * Closes the SimpleSynctexParser and releases any
 	 * system resources  associated with it.
 	 * Once the stream has been closed, further 

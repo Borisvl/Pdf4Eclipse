@@ -12,6 +12,8 @@ package de.vonloesch.synctex;
 
 import java.io.IOException;
 
+import org.eclipse.core.resources.IProject;
+
 /**
  * {@link ISynctexParser} defines the API for the Synctex search feature.
  * 
@@ -21,20 +23,22 @@ import java.io.IOException;
  */
 public interface ISynctexParser {
 
-	void setReverseSearchInformation(int currentPage, double pdfX, double pdfY);
+    void setReverseSearchInformation(int currentPage, double pdfX, double pdfY);
 
-	void startReverse() throws IOException;
+    void startReverse() throws IOException;
 
-	void startForward() throws IOException;
+    void startForward() throws IOException;
 
-	void close() throws IOException;
+    void close() throws IOException;
 
-	String getSourceFilePath();
+    String getSourceFilePath();
 
-	int getSourceLineNr();
+    int getSourceLineNr();
 
-	void setForwardSearchInformation(String file, int lineNr);
+    void setForwardSearchInformation(String file, int lineNr);
 
-	double[] getForwardSearchResult();
+    double[] getForwardSearchResult();
+
+    void setEclipseProject(IProject eclipseProject);
 
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="de.vonloesch.pdf4Eclipse.synctexParserAdapter" name="SynctexParserAdapter" schema="schema/de.vonloesch.pdf4Eclipse.synctexParser.exsd"/>
+   <extension-point id="de.vonloesch.pdf4Eclipse.synctexParserAdapter" name="SynctexParserAdapter" schema="schema/de.vonloesch.pdf4Eclipse.synctexParserAdapter.exsd"/>
 
    <extension
          point="org.eclipse.ui.editors">

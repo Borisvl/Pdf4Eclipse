@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -128,6 +129,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	private Cursor cursorHand;
 	private Cursor cursorArrow;
+    private IProject eclipseProject;
 	
 	public PDFEditor() {
 		super();
@@ -177,7 +179,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			file = new File(((FileStoreEditorInput)input).getURI());
 		}
 		else if ((input instanceof IFileEditorInput)) {
-			file = new File(((IFileEditorInput) input).getFile().getLocationURI());
+			IFileEditorInput eclipseInputFile = (IFileEditorInput) input;
+            file = new File(eclipseInputFile.getFile().getLocationURI());
+            eclipseProject = eclipseInputFile.getFile().getProject();
 		}
 		else {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg1);
@@ -553,7 +557,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		try {
 			//FIXME: Create a job for this
 			ISynctexParser p = createSimpleSynctexParser(syncTeXFile);
-			//System.out.println("Start Forward search");
+			p.setEclipseProject(eclipseProject);
 			p.setForwardSearchInformation(file, lineNr);
 			p.startForward();
 			p.close();
