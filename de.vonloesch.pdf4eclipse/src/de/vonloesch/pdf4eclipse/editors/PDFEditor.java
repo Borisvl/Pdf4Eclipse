@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -88,7 +89,8 @@ import de.vonloesch.pdf4eclipse.model.IPDFPage;
 import de.vonloesch.pdf4eclipse.model.PDFFactory;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
 import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
-import de.vonloesch.synctex.SimpleSynctexParser;
+import de.vonloesch.synctex.DefaultSynctexParserFactory;
+import de.vonloesch.synctex.ISynctexParser;
 
 /**
  * 
@@ -127,6 +129,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	private Cursor cursorHand;
 	private Cursor cursorArrow;
+    private IProject eclipseProject;
 	
 	public PDFEditor() {
 		super();
@@ -176,7 +179,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			file = new File(((FileStoreEditorInput)input).getURI());
 		}
 		else if ((input instanceof IFileEditorInput)) {
-			file = new File(((IFileEditorInput) input).getFile().getLocationURI());
+			IFileEditorInput eclipseInputFile = (IFileEditorInput) input;
+            file = new File(eclipseInputFile.getFile().getLocationURI());
+            eclipseProject = eclipseInputFile.getFile().getProject();
 		}
 		else {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg1);
@@ -523,7 +528,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		return null;
 	}
 	
-	private SimpleSynctexParser createSimpleSynctexParser(File f) 
+	private ISynctexParser createSimpleSynctexParser(File f) 
 		throws IOException {
 		InputStream in;
 		if (f.getName().toLowerCase().endsWith(".gz")) {
@@ -533,7 +538,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			in = new FileInputStream(f);
 		}
 		BufferedReader r = new BufferedReader(new InputStreamReader(in));
-		return new SimpleSynctexParser(r);
+		return DefaultSynctexParserFactory.create(r);
 	}
 
 	/**
@@ -551,8 +556,8 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (syncTeXFile == null) return FORWARD_SEARCH_NO_SYNCTEX;
 		try {
 			//FIXME: Create a job for this
-			SimpleSynctexParser p = createSimpleSynctexParser(syncTeXFile);
-			//System.out.println("Start Forward search");
+			ISynctexParser p = createSimpleSynctexParser(syncTeXFile);
+			p.setEclipseProject(eclipseProject);
 			p.setForwardSearchInformation(file, lineNr);
 			p.startForward();
 			p.close();
@@ -595,23 +600,25 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		//File f = new File (((IFileEditorInput) getEditorInput()).getFile().getRawLocation().removeFileExtension().addFileExtension("synctex.gz").toOSString());
 		try {
 			//FIXME: Create a job for this
-			SimpleSynctexParser p = createSimpleSynctexParser(f);
+			ISynctexParser p = createSimpleSynctexParser(f);
 			p.setReverseSearchInformation(currentPage, pdfX, pdfY);
 			p.startReverse();
 			p.close();
 
-			if (p.sourceFilePath == null) {
+			String sourceFilePath = p.getSourceFilePath();
+			int sourceLineNr = p.getSourceLineNr();
+			if (sourceFilePath == null) {
 				//Could not find a source file
 				writeStatusLineError(Messages.PDFEditor_SynctexMsg2);
 				return;
 			}
 
-			File sourceFile = new File(p.sourceFilePath);
-			String path = p.sourceFilePath;
+			File sourceFile = new File(sourceFilePath);
+			String path = sourceFilePath;
 			if (!sourceFile.isAbsolute()) {
 				//Append it to the path of the pdf
 				path = f.getCanonicalPath();
-				path = path.substring(0, path.lastIndexOf(File.separatorChar)+1) + p.sourceFilePath;
+				path = path.substring(0, path.lastIndexOf(File.separatorChar)+1) + sourceFilePath;
 			}
 			IFileStore fileStore = EFS.getLocalFileSystem().fromLocalFile(new File(path));
 			if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
@@ -621,12 +628,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 					if (part instanceof AbstractTextEditor) {
 						AbstractTextEditor t = (AbstractTextEditor) part;
 						IDocument doc = t.getDocumentProvider().getDocument(t.getEditorInput());
-						t.selectAndReveal(doc.getLineOffset(p.sourceLineNr - 1), doc.getLineLength(p.sourceLineNr - 1));
+						t.selectAndReveal(doc.getLineOffset(sourceLineNr - 1), doc.getLineLength(sourceLineNr - 1));
 					}
 				} catch (PartInitException e) {
 					e.printStackTrace();
 				} catch (BadLocationException e) {
-					writeStatusLineError(NLS.bind(Messages.PDFEditor_SynctexMsg3, p.sourceLineNr - 1));
+					writeStatusLineError(NLS.bind(Messages.PDFEditor_SynctexMsg3, sourceLineNr - 1));
 				}
 			} else {
 				writeStatusLineError(NLS.bind(Messages.PDFEditor_SynctexMsg4, path));
