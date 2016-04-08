@@ -23,15 +23,15 @@
 		<!-- http://maven.apache.org/general.html#encoding-warning  -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<tycho-version>0.14.0</tycho-version>
+		<tycho-version>0.24.0</tycho-version>
 	</properties>
 
   <repositories>
     <!-- configure p2 repository to resolve against -->
     <repository>
-      <id>indigo</id>
+      <id>mars</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/releases/indigo</url>
+      <url>http://download.eclipse.org/eclipse/updates/4.5/R-4.5.2-201602121500/</url>
     </repository>
   </repositories>
 
