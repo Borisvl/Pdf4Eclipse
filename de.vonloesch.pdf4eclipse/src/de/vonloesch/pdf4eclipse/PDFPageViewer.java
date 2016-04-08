@@ -186,7 +186,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 		prefs.addPreferenceChangeListener(this);
 		
 		highlightLinks = prefs.getBoolean(ToggleLinkHighlightHandler.PREF_LINKHIGHTLIGHT_ID, true);
-		autoTrimOn = prefs.getBoolean(ToggleAutoTrimHandler.PREF_AUTOTRIM_ID, false);
+		autoTrimOn = prefs.getBoolean(ToggleAutoTrimHandler.PREF_AUTOTRIM_ID, true);
     }
 
     
