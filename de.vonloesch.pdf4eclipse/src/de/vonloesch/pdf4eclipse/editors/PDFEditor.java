@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Boris von Loesch.
+ * Copyright (c) 2011,2012 Boris von Loesch.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Boris von Loesch - initial API and implementation
+ *     MeisterYeti - pseudo-continuous scrolling and zooming by mouse wheel
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.editors;
 
@@ -19,9 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.core.filesystem.EFS;
@@ -29,10 +29,16 @@ import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.osgi.util.NLS;
@@ -42,12 +48,19 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseWheelListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -57,6 +70,7 @@ import org.eclipse.ui.INavigationLocation;
 import org.eclipse.ui.INavigationLocationProvider;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -65,17 +79,17 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
-
-import com.sun.pdfview.OutlineNode;
-import com.sun.pdfview.PDFDestination;
-import com.sun.pdfview.PDFFile;
-import com.sun.pdfview.PDFObject;
-import com.sun.pdfview.PDFPage;
-
+import de.vonloesch.pdf4eclipse.Activator;
 import de.vonloesch.pdf4eclipse.Messages;
 import de.vonloesch.pdf4eclipse.PDFPageViewer;
 import de.vonloesch.pdf4eclipse.editors.StatusLinePageSelector.IPageChangeListener;
+import de.vonloesch.pdf4eclipse.model.IOutlineNode;
+import de.vonloesch.pdf4eclipse.model.IPDFDestination;
+import de.vonloesch.pdf4eclipse.model.IPDFFile;
+import de.vonloesch.pdf4eclipse.model.IPDFPage;
+import de.vonloesch.pdf4eclipse.model.PDFFactory;
 import de.vonloesch.pdf4eclipse.outline.PDFFileOutline;
+import de.vonloesch.pdf4eclipse.preferences.PreferenceConstants;
 import de.vonloesch.synctex.SimpleSynctexParser;
 
 /**
@@ -84,7 +98,7 @@ import de.vonloesch.synctex.SimpleSynctexParser;
  *
  */
 public class PDFEditor extends EditorPart implements IResourceChangeListener, 
-	INavigationLocationProvider, IPageChangeListener{
+	INavigationLocationProvider, IPageChangeListener, IPreferenceChangeListener{
 
 	public static final String ID = "de.vonloesch.pdf4eclipse.editors.PDFEditor"; //$NON-NLS-1$
 	public static final String CONTEXT_ID = "PDFViewer.editors.contextid"; //$NON-NLS-1$
@@ -94,20 +108,28 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	public static final int FORWARD_SEARCH_FILE_NOT_FOUND = -2;
 	public static final int FORWARD_SEARCH_POS_NOT_FOUND = -3;
 	public static final int FORWARD_SEARCH_UNKNOWN_ERROR = -4;
+	
+	private static final float MOUSE_ZOOMFACTOR = 0.2f;
+	
+	private static final int SCROLLING_WAIT_TIME = 200;
 
 	static final String PDFPOSITION_ID = "PDFPosition"; //$NON-NLS-1$
 	
 	public PDFPageViewer pv;
 	private File file;
-	private ByteBuffer buf;
 
-	private PDFFile f;
+	private IPDFFile f;
 	private ScrolledComposite sc;
 	int currentPage;
-	private int pageNumbers;
 	private PDFFileOutline outline;
 	private StatusLinePageSelector position;
+	
+	private Listener mouseWheelPageListener;
+	private boolean isListeningForMouseWheel;
 
+	private Cursor cursorHand;
+	private Cursor cursorArrow;
+	
 	public PDFEditor() {
 		super();
 	}
@@ -119,11 +141,16 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (sc != null) sc.dispose();
 		if (pv != null) pv.dispose();
 		if (outline != null) outline.dispose();
+		if (cursorArrow != null) cursorArrow.dispose();
+		if (cursorHand != null) cursorHand.dispose();
 		
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
 		if (position != null) position.removePageChangeListener(this);
-
-		buf = null;
+		
+        IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
+		prefs.removePreferenceChangeListener(this);
+		
+		if (f != null) f.close();
 		f = null;
 		pv = null;
 	}
@@ -158,37 +185,9 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 		f = null;
 		try {
-			long len = file.length();
-			if (len > Integer.MAX_VALUE) {
-				throw new IOException(Messages.PDFEditor_ErrorMsg2 + file.getName());
-			}
-			int contentLength = (int) len;
-			/*if (len <= MAX_DIRECT_FILESIZE) {
-				istr = new FileInputStream(file);
-				byte[] byteBuf = new byte[contentLength];
-				int offset = 0;
-				int read = 0;
-				while (read >= 0 && offset < contentLength) {
-					read = istr.read(byteBuf, offset, contentLength - offset);
-					if (read > 0) {
-						offset += read;
-					}
-				}
-				buf = ByteBuffer.wrap(byteBuf);
-			}
-			else {*/
-			RandomAccessFile ff = new RandomAccessFile(file, "r"); //$NON-NLS-1$
-			buf = ByteBuffer.allocateDirect((int) contentLength);
-			FileChannel c = ff.getChannel();
-			c.read(buf);
-			//Mapped buffers lock the file, hence Latex could not rebuild it
-			//at least under Windows OS
-			//buf = c.map(MapMode.READ_ONLY, 0, len);
-			c.close();
-			ff.close();
-			//}
-			f = new PDFFile(buf);	  
-			pageNumbers = f.getNumPages();
+			IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
+			int r = prefs.getInt(PreferenceConstants.PDF_RENDERER, PDFFactory.STRATEGY_SUN_JPEDAL);
+			f = PDFFactory.openPDFFile(file, r);
 		} catch (FileNotFoundException fnfe) {
 			throw new PartInitException(Messages.PDFEditor_ErrorMsg3, fnfe);
 		} catch (IOException ioe) {
@@ -223,9 +222,11 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 				if (!(getEditorInput() instanceof IFileEditorInput)) return;
 
 				final IFile currentfile = ((IFileEditorInput) getEditorInput()).getFile();
-				if (event.getDelta().findMember(currentfile.getFullPath()) != null){
-					readPdfFile();
-					final OutlineNode n = f.getOutline();
+				final IResourceDelta delta = event.getDelta().findMember(currentfile.getFullPath());
+				if (delta != null && (delta.getKind() & IResourceDelta.REMOVED) == 0) {
+					//readPdfFile();
+					f.reload();
+					final IOutlineNode n = f.getOutline();
 					Display.getDefault().asyncExec(new Runnable() {										
 						@Override
 						public void run() {
@@ -237,10 +238,12 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 						}
 					});
 				}
-			} catch (PartInitException e) {
+			} 
+			/*catch (PartInitException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IOException e) {
+			}*/ 
+			catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -277,12 +280,117 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		fillLayout.spacing= 0;
 		sc.setLayout(fillLayout);
 		
+		cursorHand = new Cursor(Display.getDefault(), SWT.CURSOR_HAND);
+		cursorArrow = new Cursor(Display.getDefault(), SWT.CURSOR_ARROW);
+
 		pv = new PDFPageViewer(sc, this);
 		//pv = new PDFPageViewerAWT(sc, this);
 		sc.setContent(pv);
 		// Speed up scrolling when using a wheel mouse
 		ScrollBar vBar = sc.getVerticalBar();
 		vBar.setIncrement(10);
+				
+		
+		isListeningForMouseWheel = false;
+		mouseWheelPageListener = new Listener() {
+			
+			//last time the page number changed due to a scrolling event
+			long lastTime;
+			
+			@Override
+			public void handleEvent(Event e) {
+				long time = e.time & 0xFFFFFFFFL;
+				
+				//If a scrolling event occurs within a very short period of time
+				//after the last page change discard it. This avoids "overscrolling"
+				//the beginning of the next page
+				if (time - lastTime < SCROLLING_WAIT_TIME) {
+					e.doit = false;
+					return;
+				}
+				
+				Point p = sc.getOrigin();
+				
+				int height = sc.getClientArea().height;
+				int pheight = sc.getContent().getBounds().height;
+
+				if (p.y >= pheight - height && e.count < 0) {
+					//We are at the end of the page
+					if (currentPage < f.getNumPages()) {
+						showPage(currentPage + 1);
+						setOrigin(sc.getOrigin().x, 0);
+						e.doit = false;
+						lastTime = time;
+					}
+				} else if (p.y <= 0 && e.count > 0) {
+					//We are at the top of the page
+					if (currentPage > 1) {
+						showPage(currentPage - 1);
+						setOrigin(sc.getOrigin().x, pheight);
+						e.doit = false;
+						lastTime = time;
+					}
+				}
+				
+			}
+		};
+		
+		//Add zooming by using mouse wheel and ctrl key (contributed by MeisterYeti)
+		pv.addMouseWheelListener(new MouseWheelListener() {
+
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				if((e.stateMask & SWT.CTRL) > 0) {
+					Point o = getOrigin();
+					Point oldSize = pv.getSize();
+					pv.setZoomFactor(Math.max(pv.getZoomFactor() + MOUSE_ZOOMFACTOR*(float)e.count/10, 0));
+					int mx = Math.round((float)pv.getSize().x * ((float)e.x / oldSize.x)) - (e.x-o.x);
+					int my = Math.round((float)pv.getSize().y * ((float)e.y / oldSize.y)) - (e.y-o.y);
+					setOrigin(mx,my);
+					return;
+				}
+				
+			}
+		});
+		
+		//Add panning of page using middle mouse button (contributed by MeisterYeti)
+		pv.addMouseListener(new MouseListener() {
+			
+			Point start;
+			MouseMoveListener mml = new MouseMoveListener() {
+				
+				@Override
+				public void mouseMove(MouseEvent e) {
+					if((e.stateMask & SWT.BUTTON2) == 0) {
+						pv.removeMouseMoveListener(this);
+						pv.setCursor(cursorArrow);
+						return;
+					}
+					Point o = sc.getOrigin();
+					sc.setOrigin(o.x-(e.x-start.x), o.y-(e.y-start.y));
+				}
+			};
+			
+			@Override
+			public void mouseUp(MouseEvent e) {
+				if(e.button != 2)
+					return;
+				pv.removeMouseMoveListener(mml);
+				pv.setCursor(cursorArrow);
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent e) {
+				if(e.button != 2)
+					return;
+				start = new Point(e.x, e.y);
+				pv.addMouseMoveListener(mml);
+				pv.setCursor(cursorHand);
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {}
+		});		
 
 		pv.addKeyListener(new KeyAdapter() {
 
@@ -353,7 +461,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 					setOrigin(sc.getOrigin().x, 0);
 				}
 				else if (e.keyCode == SWT.END) {
-					showPage(pageNumbers);
+					showPage(f.getNumPages());
 					setOrigin(sc.getOrigin().x, pheight);
 				}	
 
@@ -380,8 +488,38 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (f != null) {
 			showPage(currentPage);
 		}
+		
+        IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
+        
+		prefs.addPreferenceChangeListener(this);
+		
+		if (prefs.getBoolean(PreferenceConstants.PSEUDO_CONTINUOUS_SCROLLING, true)) {
+			pv.addListener(SWT.MouseWheel, mouseWheelPageListener);
+			isListeningForMouseWheel = true;
+		}
+
 		initKeyBindingContext();
 	}
+
+    @Override
+    public void preferenceChange(PreferenceChangeEvent event) {
+    	//Check whether "Pseudo continuous scrolling" was changed
+    	if (PreferenceConstants.PSEUDO_CONTINUOUS_SCROLLING.equals(event.getKey())) {
+    		
+    		boolean newValue = Boolean.parseBoolean((String)(event.getNewValue()));
+    		//I do not know why this happens, but getNewValue() returns null instead of true
+    		if (event.getNewValue() == null) newValue = true;
+    		
+    		if (isListeningForMouseWheel && newValue == false) {
+    			pv.removeListener(SWT.MouseWheel, mouseWheelPageListener);
+    			isListeningForMouseWheel = false;
+    		}
+    		else if (!isListeningForMouseWheel && newValue == true) {
+    			pv.addListener(SWT.MouseWheel, mouseWheelPageListener);
+    			isListeningForMouseWheel = true;
+    		}
+    	}
+    }
 
 	private void initKeyBindingContext() {
 		final IContextService service = (IContextService)
@@ -437,11 +575,11 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * 		{@link FORWARD_SEARCH_POS_NOT_FOUND}, {@link FORWARD_SEARCH_UNKNOWN_ERROR}
 	 */
 	public int forwardSearch(String file, int lineNr) {
-		File f = getSyncTeXFile();
-		if (f == null) return FORWARD_SEARCH_NO_SYNCTEX;
+		File syncTeXFile = getSyncTeXFile();
+		if (syncTeXFile == null) return FORWARD_SEARCH_NO_SYNCTEX;
 		try {
 			//FIXME: Create a job for this
-			SimpleSynctexParser p = createSimpleSynctexParser(f);
+			SimpleSynctexParser p = createSimpleSynctexParser(syncTeXFile);
 			//System.out.println("Start Forward search");
 			p.setForwardSearchInformation(file, lineNr);
 			p.startForward();
@@ -451,7 +589,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			if (result == null) return FORWARD_SEARCH_FILE_NOT_FOUND;
 
 			int page = (int) Math.round(result[0]);
-			if (page > pageNumbers || page < 1) return FORWARD_SEARCH_UNKNOWN_ERROR;
+			if (page > f.getNumPages() || page < 1) return FORWARD_SEARCH_UNKNOWN_ERROR;
 			showPage(page);
 			pv.highlight(result[1], result[2], result[3], result[4]);
 			Rectangle2D re = pv.convertPDF2ImageCoord(new Rectangle((int)Math.round(result[1]), 
@@ -531,24 +669,16 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	}
 
-	private void showPage (PDFObject page) {
-		try {	
-			int pageNr = f.getPageNumber(page)+1;
-			if (pageNr < 1) pageNr = 1;
-			if (pageNr > pageNumbers) pageNr = pageNumbers;
-			PDFPage pager = f.getPage(pageNr);
-			currentPage = pageNr;
-			pv.showPage(pager);
-			updateStatusLine();
-		} catch (IOException e) {
-			System.err.println(Messages.PDFEditor_ErrorMsg5);
-		}
+	public void showPage(IPDFPage page) {
+		currentPage = page.getPageNumber();
+		pv.showPage(page);
+		updateStatusLine();
 	}
-
+	
 	public void showPage(int pageNr) {
 		if (pageNr < 1) pageNr = 1;
-		if (pageNr > pageNumbers) pageNr = pageNumbers;
-		PDFPage page = f.getPage(pageNr);
+		if (pageNr > f.getNumPages()) pageNr = f.getNumPages();
+		IPDFPage page = f.getPage(pageNr);
 		currentPage = pageNr;
 		pv.showPage(page);
 		updateStatusLine();
@@ -565,24 +695,43 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	 * Shows the given page and reveals the destination
 	 * @param dest
 	 */
-	public void gotoAction(PDFDestination dest){
-		PDFObject page = dest.getPage();
-		if (page == null) {
-			return;
+	public void gotoAction(IPDFDestination dest) {
+		if (dest.getType() == IPDFDestination.TYPE_GOTO) {
+			IPDFPage page = dest.getPage(f);
+			if (page == null) return;
+
+			IWorkbenchPage wpage = getSite().getPage();
+			wpage.getNavigationHistory().markLocation(this);
+
+			showPage(page);
+			Rectangle2D r = dest.getPosition();
+			if (r != null) {
+				Rectangle2D re = pv.convertPDF2ImageCoord(r);
+				int x = sc.getOrigin().x;
+				if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
+				setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
+			}
+			else {
+				setOrigin(sc.getOrigin().x, 0);			
+			}
+			wpage.getNavigationHistory().markLocation(this);
+		} 
+		else if (dest.getType() == IPDFDestination.TYPE_URL) {
+			String url = dest.getURL();
+			if (url.toLowerCase().indexOf("://") < 0) { //$NON-NLS-1$
+				url = "http://" + url; //$NON-NLS-1$
+			}
+			try {
+				PlatformUI.getWorkbench().getBrowserSupport()
+				.createBrowser("PDFBrowser").openURL(new URL(url));
+			}
+			catch (PartInitException e) {
+				Activator.log("Problem opening browser", e);
+			}
+			catch (MalformedURLException e) {
+				MessageDialog.openError(this.getSite().getShell(), "No valid url", e.getMessage());
+			} //$NON-NLS-1$
 		}
-
-		IWorkbenchPage wpage = getSite().getPage();
-		wpage.getNavigationHistory().markLocation(this);
-
-		showPage(page);
-
-		Rectangle2D re = pv.convertPDF2ImageCoord(new Rectangle((int)Math.round(dest.getLeft()), (int)Math.round(dest.getTop()), 
-				1, 1));
-		int x = sc.getOrigin().x;
-		if (re.getX() < sc.getOrigin().x) x = (int)Math.round(re.getX() - 10);
-		setOrigin(x, (int)Math.round(re.getY() - sc.getBounds().height / 4.));
-
-		wpage.getNavigationHistory().markLocation(this);
 	}
 
 	@Override
@@ -590,7 +739,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		if (IContentOutlinePage.class.equals(required)) {
 			if (outline == null) {
 				try {
-					OutlineNode n = f.getOutline();
+					IOutlineNode n = f.getOutline();
 					if (n == null) return null;
 					outline = new PDFFileOutline(this);
 					outline.setInput(n);
@@ -616,7 +765,7 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	}
 
 	private void updateStatusLine() {
-		position.setPageInfo(currentPage, pageNumbers);
+		position.setPageInfo(currentPage, f.getNumPages());
 	}
 
 	public void fitHorizontal() {

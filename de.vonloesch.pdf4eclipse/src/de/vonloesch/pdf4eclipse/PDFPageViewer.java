@@ -10,11 +10,8 @@
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Double;
 import java.awt.image.BufferedImage;
@@ -22,10 +19,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
-import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
@@ -44,22 +37,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-
-
-import com.sun.pdfview.ImageInfo;
-import com.sun.pdfview.PDFPage;
-import com.sun.pdfview.PDFRenderer;
-import com.sun.pdfview.RefImage;
-import com.sun.pdfview.Watchable;
-import com.sun.pdfview.action.GoToAction;
-import com.sun.pdfview.action.UriAction;
-import com.sun.pdfview.annotation.LinkAnnotation;
-import com.sun.pdfview.annotation.PDFAnnotation;
 
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
 import de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler;
+import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
+import de.vonloesch.pdf4eclipse.model.IPDFPage;
 
 
 /**
@@ -75,15 +57,13 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     private Image currentImage;
     
     /** The current PDFPage that was rendered into currentImage */
-    public PDFPage currentPage;
+    public IPDFPage currentPage;
     /** the current transform from device space to page space */
     AffineTransform currentXform;
     /** The horizontal offset of the image from the left edge of the panel */
     int offx;
     /** The vertical offset of the image from the top of the panel */
     int offy;
-    /** the size of the image */
-    Dimension prevSize;
     
     private boolean highlightLinks;
     private Rectangle2D highlight;
@@ -92,7 +72,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     
     private float zoomFactor;
     
-    private org.eclipse.swt.graphics.Image swtImage;
+    //private org.eclipse.swt.graphics.Image swtImage;
 
     /**
      * Create a new PagePanel.
@@ -100,7 +80,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     public PDFPageViewer(Composite parent, final PDFEditor editor) {
         //super(parent, SWT.NO_BACKGROUND|SWT.NO_REDRAW_RESIZE);
     	//super(parent, SWT.EMBEDDED | SWT.NO_BACKGROUND | SWT.NO_REDRAW_RESIZE);
-    	super(parent, SWT.NO_BACKGROUND);
+    	super(parent, SWT.NO_BACKGROUND | SWT.NO_MERGE_PAINTS);
 
     	this.addMouseListener(new MouseListener() {
 			
@@ -113,7 +93,22 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 				
 				if (e.button != 1) return;
 				
-				List<PDFAnnotation> annos = getPage().getAnnots(PDFAnnotation.LINK_ANNOTATION);
+				IPDFLinkAnnotation[] annos = getPage().getAnnotations();
+            	for (final IPDFLinkAnnotation a : annos) {
+            		Rectangle2D r = convertPDF2ImageCoord(a.getPosition());
+            		if (r.contains(e.x, e.y)) {
+            			if (a.getDestination() != null) {	
+            				Display.getDefault().asyncExec(new Runnable() {
+            					@Override
+            					public void run() {
+            						editor.gotoAction(a.getDestination());
+            					}
+            				});
+            				return;
+            			}
+            		}
+            	}
+				/*List<PDFAnnotation> annos = getPage().getAnnots(PDFAnnotation.LINK_ANNOTATION);
             	for (PDFAnnotation a : annos) {
             		LinkAnnotation aa = (LinkAnnotation) a;
             		Rectangle2D r = convertPDF2ImageCoord(aa.getRect());
@@ -153,7 +148,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             				return;
             			}
             		}
-				}
+				}*/
 			}
 			
 			@Override
@@ -291,11 +286,11 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
      * Stop the generation of any previous page, and draw the new one.
      * @param page the PDFPage to draw.
      */
-    public void showPage(PDFPage page) {
+    public void showPage(IPDFPage page) {
     	// stop drawing the previous page
-    	if (currentPage != null && prevSize != null && currentPage.isFinished()) {
+/*    	if (currentPage != null && prevSize != null && currentPage.isFinished()) {
     		currentPage.stop(prevSize.width, prevSize.height, null);
-    	}
+    	}*/
 
     	// set up the new page
     	currentPage = page;
@@ -309,69 +304,27 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 
     	Point sz = getSize();
 
+    	if (sz.x == 0 || sz.y == 0) return;
+    	currentImage = page.getImage(newH, newW);
+
+    	newW = currentImage.getWidth(null);
+    	newH = currentImage.getHeight(null);
     	if (sz.x != newW || sz.y != newH) {
     		sz.x = newW;
     		sz.y = newH;
     		resize = true;
     	}
 
-    	if (sz.x == 0 || sz.y == 0) return;
 
-    	Dimension pageSize = page.getUnstretchedSize(sz.x, sz.y, null);
-
-    	ImageInfo info = new ImageInfo(pageSize.width, pageSize.height, null, Color.WHITE);
-
-    	PDFRenderer r = null;
-    	currentImage = null;
+    	//long time = System.currentTimeMillis();
+    	//if (swtImage != null) swtImage.dispose();
+    	//swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)currentImage));
+    	//System.out.println(System.currentTimeMillis() - time);
     	
-    	//First check if there is already an old renderer
-    	if (page.renderers.containsKey(info)) {
-    		r = (PDFRenderer) page.renderers.get(info).get();
-    		//Note, this is a weak reference, so r could be null
-    	}
-    	
-    	if (r != null) {
-    		currentImage = r.getImage();
-    	}
-    	
-    	if (currentImage == null) {
-    		//We have no cached image :(
-    		currentImage = new RefImage(pageSize.width, pageSize.height,
-    				//BufferedImage.TYPE_INT_ARGB);
-    				BufferedImage.TYPE_4BYTE_ABGR);
-
-    		page.renderers.clear();
-    		r = new PDFRenderer(page, info, (BufferedImage) currentImage);
-    		/*java.awt.Rectangle rect = new java.awt.Rectangle(0, 0, pageSize.width, pageSize.height);
-    		PDFRenderer r = new PDFRenderer(page, ((BufferedImage)currentImage).createGraphics(), rect, 
-    			null, Color.WHITE);*/
-    		page.renderers.put(info, new WeakReference<PDFRenderer>(r));
-    		
-    	}
-    	// calculate the transform from screen to page space
-    	currentXform = page.getInitialTransform(pageSize.width,
-    			pageSize.height, null);
-    	try {
-    		currentXform = currentXform.createInverse();
-    	} catch (NoninvertibleTransformException nte) {
-    		System.out.println(Messages.PDFPageViewer_Error1);
-    		nte.printStackTrace();
-    	}
-
-    	prevSize = pageSize;
-
-    	//Render the image
-    	if (r.getStatus() != Watchable.COMPLETED) {
-    		r.go(true);
-    		if (r.getStatus() != Watchable.COMPLETED) return;
-    	}
-
-    	if (swtImage != null) swtImage.dispose();
-    	swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)currentImage));
-
     	if (resize) {
     		//Resize triggers repaint
-    		setSize(Math.round(zoomFactor*page.getWidth()), Math.round(zoomFactor*page.getHeight()));
+    		setSize(currentImage.getWidth(null), currentImage.getHeight(null));
+    		//setSize(Math.round(zoomFactor*page.getWidth()), Math.round(zoomFactor*page.getHeight()));
     		redraw();
     	}
     }
@@ -381,23 +334,11 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     }
     
     public Rectangle2D convertPDF2ImageCoord(Rectangle2D r) {
-    	if (currentImage == null) return null;
-    	int imwid = currentImage.getWidth(null);
-        int imhgt = currentImage.getHeight(null);
-    	AffineTransform t = currentPage.getInitialTransform(imwid,
-                imhgt, null);
-    	Rectangle2D tr = t.createTransformedShape(r).getBounds2D();
-    	tr.setFrame(tr.getX() + offx, tr.getY() + offy, tr.getWidth(), tr.getHeight());
-    	return tr;    	
+    	return currentPage.pdf2ImageCoordinates(r);
     }
     
     public Rectangle2D convertImage2PDFCoord(Rectangle2D r) {
-    	if (currentImage == null) return null;
-
-    	r.setFrame(r.getX() - offx, r.getY() -offy, 1, 1);
-    	Rectangle2D tr = currentXform.createTransformedShape(r).getBounds2D();
-    	tr.setFrame(tr.getX(), tr.getY(), tr.getWidth(), tr.getHeight());
-    	return tr;    	
+    	return currentPage.image2PdfCoordinates(r);
     }
     
     /**
@@ -433,7 +374,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             // draw the image
             int imwid = currentImage.getWidth(null);
             int imhgt = currentImage.getHeight(null);
-
+            
             // draw it centered within the panel
             offx = (sz.x - imwid) / 2;
             offy = (sz.y - imhgt) / 2;
@@ -441,13 +382,19 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
             if ((imwid == sz.x && imhgt <= sz.y) ||
                     (imhgt == sz.y && imwid <= sz.x)) {
             	
-            	if (swtImage != null) g.drawImage(swtImage, offx, offy);
+            	Image temp = new BufferedImage(event.width, event.height, BufferedImage.TYPE_4BYTE_ABGR);
+            	temp.getGraphics().drawImage(currentImage, 0, 0, event.width, event.height, event.x, event.y, 
+            			event.x + event.width, event.y + event.height, null);
+            	org.eclipse.swt.graphics.Image swtImage = new org.eclipse.swt.graphics.Image(display, convertToSWT((BufferedImage)temp));
+            	//if (swtImage != null) g.drawImage(swtImage, offx, offy);
+            	g.drawImage(swtImage, event.x, event.y);
+            	swtImage.dispose();
 
             	if (highlightLinks) {
-            		List<PDFAnnotation> anno = currentPage.getAnnots(PDFAnnotation.LINK_ANNOTATION);
+            		IPDFLinkAnnotation[] anno = currentPage.getAnnotations();
             		g.setForeground(display.getSystemColor(SWT.COLOR_RED));
-            		for (PDFAnnotation a : anno) {
-            			Rectangle r = getRectangle(convertPDF2ImageCoord(a.getRect()));
+            		for (IPDFLinkAnnotation a : anno) {
+            			Rectangle r = getRectangle(convertPDF2ImageCoord(a.getPosition()));
             			g.drawRectangle(r);
             		}
             	}
@@ -482,7 +429,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     /**
      * Gets the page currently being displayed
      */
-    public PDFPage getPage() {
+    public IPDFPage getPage() {
         return currentPage;
     }
 
@@ -491,7 +438,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	super.dispose();
 
     	currentImage.flush();
-    	if (swtImage != null) swtImage.dispose();
+    	//if (swtImage != null) swtImage.dispose();
 		currentImage = null;
     	
     	//IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);

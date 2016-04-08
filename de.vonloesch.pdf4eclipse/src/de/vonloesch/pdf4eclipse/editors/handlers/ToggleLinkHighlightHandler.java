@@ -24,6 +24,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.handlers.RegistryToggleState;
 import org.eclipse.ui.menus.UIElement;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class ToggleLinkHighlightHandler extends AbstractHandler implements IElementUpdater{
 
@@ -43,6 +44,11 @@ public class ToggleLinkHighlightHandler extends AbstractHandler implements IElem
 		service.refreshElements(command.getId(), null);
 		IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
 		prefs.putBoolean(PREF_LINKHIGHTLIGHT_ID, ((Boolean) state.getValue()).booleanValue());
+		try {
+			prefs.flush();
+		} catch (BackingStoreException e) {
+			//Do nothing
+		}
 		return null;
 	}	
 	

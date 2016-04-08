@@ -6,6 +6,7 @@
   <packaging>pom</packaging>
   
 	<modules>
+		<module>org.jpedal.pdf</module>
 		<module>de.vonloesch.pdf4eclipse.help</module>
 		<module>de.vonloesch.pdf4eclipse</module>
 		<module>de.vonloesch.pdf4eclipse.feature</module>

@@ -10,12 +10,10 @@
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.outline;
 
-import java.util.Enumeration;
-
-import javax.swing.tree.TreeNode;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+
+import de.vonloesch.pdf4eclipse.model.IOutlineNode;
 
 public class PDFFileContentProvider implements ITreeContentProvider {
 
@@ -36,27 +34,20 @@ public class PDFFileContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		TreeNode node = (TreeNode) parentElement;
-		TreeNode[] tn = new TreeNode[node.getChildCount()];
-		Enumeration<TreeNode> te = node.children();
-		int i = 0;
-		while (te.hasMoreElements()) {
-			tn[i] = te.nextElement();
-			i++;
-		}
-		return tn;
+		IOutlineNode node = (IOutlineNode) parentElement;
+		return node.getChildren();
 	}
 
 	@Override
 	public Object getParent(Object element) {
-		TreeNode node = (TreeNode) element;
+		IOutlineNode node = (IOutlineNode) element;
 		return node.getParent();
 	}
 
 	@Override
 	public boolean hasChildren(Object element) {
-		TreeNode node = (TreeNode) element;
-		return (node.getChildCount() > 0);
+		IOutlineNode node = (IOutlineNode) element;
+		return node.hasChildren();
 	}
 
 

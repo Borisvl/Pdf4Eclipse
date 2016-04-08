@@ -19,4 +19,5 @@ For more details visit the homepage: http://borisvl.github.com/Pdf4Eclipse
 Dependencies
 --------------------------------
 To render the pdf documents, Pdf4Eclipse uses a [fork](https://github.com/Borisvl/PDFrenderer) 
-of [Sun's Pdf-renderer](http://java.net/projects/pdf-renderer).
+of [Sun's Pdf-renderer](http://java.net/projects/pdf-renderer) and the 
+LGPL version of [JPedal's pdf renderer](http://www.jpedal.org).

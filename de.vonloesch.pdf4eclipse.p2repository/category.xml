@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/de.vonloesch.pdf4eclipse.feature_1.0.1.qualifier.jar" id="de.vonloesch.pdf4eclipse.feature" version="1.0.1.qualifier">
+   <feature url="features/de.vonloesch.pdf4eclipse.feature_1.1.0.qualifier.jar" id="de.vonloesch.pdf4eclipse.feature" version="1.1.0.qualifier">
       <category name="tychodemo.category"/>
    </feature>
    <category-def name="tychodemo.category" label="PDF4Eclipse Category">
