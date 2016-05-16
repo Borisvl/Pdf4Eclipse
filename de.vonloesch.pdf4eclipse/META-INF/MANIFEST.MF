@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: de.vonloesch.pdf4Eclipse;singleton:=true
+Bundle-SymbolicName: de.vonloesch.pdf4eclipse;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: de.vonloesch.pdf4eclipse.Activator
 Require-Bundle: org.eclipse.ui;bundle-version="3.1.0",
@@ -17,6 +17,14 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.1.0",
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- lib/jbig2.jar,
  lib/PDFrenderer.jar
 Bundle-Vendor: %Bundle-Vendor
+Export-Package: de.vonloesch.pdf4eclipse,
+ de.vonloesch.pdf4eclipse.editors,
+ de.vonloesch.pdf4eclipse.editors.handlers,
+ de.vonloesch.pdf4eclipse.model,
+ de.vonloesch.pdf4eclipse.model.jpedal,
+ de.vonloesch.pdf4eclipse.model.sun,
+ de.vonloesch.pdf4eclipse.outline,
+ de.vonloesch.pdf4eclipse.preferences,
+ de.vonloesch.synctex
