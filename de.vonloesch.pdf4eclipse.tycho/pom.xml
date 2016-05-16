@@ -13,7 +13,7 @@
 		<module>../org.jpedal.pdf</module>
 	</modules>
 	<properties>
-		<tycho.version>0.21.0</tycho.version>
+		<tycho.version>0.25.0</tycho.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<luna-repo.url>http://download.eclipse.org/releases/luna</luna-repo.url>
 	</properties>
