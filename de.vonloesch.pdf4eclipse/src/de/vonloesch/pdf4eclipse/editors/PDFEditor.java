@@ -478,7 +478,16 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 			@Override
 			public void controlResized(ControlEvent e) {
 				try {
-					fitHorizontal();
+				  switch (fitState) {
+				  case FIT:
+				    fit();
+				    break;
+				  case FITH:
+				    fitHorizontal();
+				    break;
+				  case NONE:
+				    break;
+				  }
 				} catch (Exception ex) {}
 			}
 
@@ -754,6 +763,32 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	private void updateStatusLine() {
 		position.setPageInfo(currentPage, f.getNumPages());
 	}
+	
+	private enum FIT_STATE {
+	  NONE,
+	  FIT,
+	  FITH;
+	}
+	
+	private FIT_STATE fitState = FIT_STATE.FITH;
+    
+    public void _fitHorizontal() {
+      if (fitState == FIT_STATE.FITH)
+        fitState = FIT_STATE.NONE;
+      else {
+        fitState = FIT_STATE.FITH;
+        fitHorizontal();
+      }
+    }
+    
+    public void _fit() {
+      if (fitState == FIT_STATE.FIT)
+        fitState = FIT_STATE.NONE;
+      else {
+        fitState = FIT_STATE.FIT;
+        fit();
+      }
+    }
 
 	public void fitHorizontal() {
 		int w = sc.getClientArea().width;

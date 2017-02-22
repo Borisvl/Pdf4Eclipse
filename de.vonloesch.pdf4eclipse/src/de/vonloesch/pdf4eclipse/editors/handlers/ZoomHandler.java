@@ -56,11 +56,11 @@ public class ZoomHandler extends AbstractHandler {
 		}
 		
 		else if (msg.toLowerCase().equals(FIT_HORIZONTAL)) {
-			((PDFEditor) editor).fitHorizontal();
+			((PDFEditor) editor)._fitHorizontal();
 			return null;
 		}
 		else if (msg.toLowerCase().equals(FIT_COMPLETE)) {
-			((PDFEditor) editor).fit();
+			((PDFEditor) editor)._fit();
 			return null;
 		}
 

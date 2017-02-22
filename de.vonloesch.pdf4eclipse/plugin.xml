@@ -133,7 +133,7 @@
             <command
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/arrow-move.png"
-                  style="push"
+                  style="toggle"
                   tooltip="%command.tooltip.0">
                <visibleWhen
                      checkEnabled="false">
@@ -149,7 +149,7 @@
             <command
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/arrow-resize.png"
-                  style="push"
+                  style="toggle"
                   tooltip="%command.tooltip.1">
                <visibleWhen
                      checkEnabled="false">
