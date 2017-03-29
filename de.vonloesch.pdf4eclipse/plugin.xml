@@ -56,6 +56,27 @@
             </class>
          </state>
       </command>
+      <command
+            categoryId="de.vonloesch.pdf4Eclipse.category"
+            defaultHandler="de.vonloesch.pdf4eclipse.editors.handlers.ToggleAutoTrimHandler"
+            helpContextId="de.vonloesch.pdf4eclipse.annotationsToggleAutoTrim"
+            id="PDFViewer.command.ToggleAutoTrim"
+            name="%command.name.2">
+         <state
+               id="org.eclipse.ui.commands.toggleState">
+            <class
+                  class="org.eclipse.ui.handlers.RegistryToggleState">
+               <parameter
+                     name="persisted"
+                     value="true">
+               </parameter>
+               <parameter
+                     name="default"
+                     value="false">
+               </parameter>
+            </class>
+         </state>
+      </command>
       <category
             id="de.vonloesch.pdf4Eclipse.category"
             name="Pdf4Eclipse">
@@ -133,7 +154,7 @@
             <command
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/arrow-move.png"
-                  style="push"
+                  style="toggle"
                   tooltip="%command.tooltip.0">
                <visibleWhen
                      checkEnabled="false">
@@ -149,7 +170,7 @@
             <command
                   commandId="PDFViewer.command.Zoom"
                   icon="icons/arrow-resize.png"
-                  style="push"
+                  style="toggle"
                   tooltip="%command.tooltip.1">
                <visibleWhen
                      checkEnabled="false">
@@ -183,6 +204,18 @@
                   icon="icons/chain--pencil.png"
                   style="toggle"
                   tooltip="%command.tooltip.3">
+               <visibleWhen
+                     checkEnabled="false">
+                  <reference
+                        definitionId="PDFViewer.definitions.isPDFEditorActive">
+                  </reference>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="PDFViewer.command.ToggleAutoTrim"
+                  icon="icons/autotrim.png"
+                  style="toggle"
+                  tooltip="%command.tooltip.4">
                <visibleWhen
                      checkEnabled="false">
                   <reference

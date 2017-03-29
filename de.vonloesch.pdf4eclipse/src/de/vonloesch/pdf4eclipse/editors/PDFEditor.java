@@ -8,6 +8,7 @@
  * Contributors:
  *     Boris von Loesch - initial API and implementation
  *     MeisterYeti - pseudo-continuous scrolling and zooming by mouse wheel
+ *     Robert Bamler - auto-trimming of page margins
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse.editors;
 
@@ -44,6 +45,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -55,6 +58,8 @@ import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -250,11 +255,37 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 
 	@Override
 	public void createPartControl(final Composite parent) {
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
+		layout.verticalSpacing= 0;
+		composite.setLayout(layout);
+		
+		// a composite used to show controls
+		Composite menuC = new Composite(composite, SWT.NONE);
+		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		menuC.setLayoutData(layoutData);
+		layout = new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
+		layout.verticalSpacing= 0;
+		layoutData.exclude= true;
+		menuC.setLayout(layout);
+		
+		sc = new ScrolledComposite(composite, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		FillLayout fillLayout= new FillLayout(SWT.VERTICAL);
+		fillLayout.marginHeight= 0;
+		fillLayout.marginWidth= 0;
+		fillLayout.spacing= 0;
+		sc.setLayout(fillLayout);
+		
 		cursorHand = new Cursor(Display.getDefault(), SWT.CURSOR_HAND);
 		cursorArrow = new Cursor(Display.getDefault(), SWT.CURSOR_ARROW);
-		
-		parent.setLayout(new FillLayout());
-		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+
 		pv = new PDFPageViewer(sc, this);
 		//pv = new PDFPageViewerAWT(sc, this);
 		sc.setContent(pv);
@@ -471,6 +502,28 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 		}
 
 		initKeyBindingContext();
+		sc.addControlListener(new ControlListener() {
+
+			@Override
+			public void controlResized(ControlEvent e) {
+				try {
+				  switch (fitState) {
+				  case FIT:
+				    fit();
+				    break;
+				  case FITH:
+				    fitHorizontal();
+				    break;
+				  case NONE:
+				    break;
+				  }
+				} catch (Exception ex) {}
+			}
+
+			@Override
+			public void controlMoved(ControlEvent e) {
+			}
+		});
 	}
 
     @Override
@@ -739,15 +792,41 @@ public class PDFEditor extends EditorPart implements IResourceChangeListener,
 	private void updateStatusLine() {
 		position.setPageInfo(currentPage, f.getNumPages());
 	}
+	
+	private enum FIT_STATE {
+	  NONE,
+	  FIT,
+	  FITH;
+	}
+	
+	private FIT_STATE fitState = FIT_STATE.FITH;
+    
+    public void _fitHorizontal() {
+      if (fitState == FIT_STATE.FITH)
+        fitState = FIT_STATE.NONE;
+      else {
+        fitState = FIT_STATE.FITH;
+        fitHorizontal();
+      }
+    }
+    
+    public void _fit() {
+      if (fitState == FIT_STATE.FIT)
+        fitState = FIT_STATE.NONE;
+      else {
+        fitState = FIT_STATE.FIT;
+        fit();
+      }
+    }
 
 	public void fitHorizontal() {
 		int w = sc.getClientArea().width;
-		pv.setZoomFactor((1.0f*w)/pv.getPage().getWidth());
+		pv.setZoomFactor((1.0f/pv.getHorizontalTrimFactor()*w)/pv.getPage().getWidth());
 	}
 
 	public void fit() {
-		float w = 1.f * sc.getClientArea().width;
-		float h = 1.f * sc.getClientArea().height;
+		float w = 1.f/pv.getHorizontalTrimFactor() * sc.getClientArea().width;
+		float h = 1.f/pv.getVerticalTrimFactor() * sc.getClientArea().height;
 		float pw = pv.getPage().getWidth();
 		float ph = pv.getPage().getHeight();
 		if (w/pw < h/ph) pv.setZoomFactor(w/pw);

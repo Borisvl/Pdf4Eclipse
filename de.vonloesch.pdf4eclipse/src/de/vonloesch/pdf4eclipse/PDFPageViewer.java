@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Boris von Loesch - initial API and implementation
+ *     Robert Bamler - auto-trimming of page margins
  ******************************************************************************/
 package de.vonloesch.pdf4eclipse;
 
@@ -16,6 +17,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Double;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
@@ -39,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import de.vonloesch.pdf4eclipse.editors.PDFEditor;
+import de.vonloesch.pdf4eclipse.editors.handlers.ToggleAutoTrimHandler;
 import de.vonloesch.pdf4eclipse.editors.handlers.ToggleLinkHighlightHandler;
 import de.vonloesch.pdf4eclipse.model.IPDFLinkAnnotation;
 import de.vonloesch.pdf4eclipse.model.IPDFPage;
@@ -71,6 +74,11 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     private Display display;
     
     private float zoomFactor;
+    
+    private boolean autoTrimOn = true;
+    private Point trimOffset = new Point(0, 0);
+    private float horizontalTrimFactor = 1.0f;
+    private float verticalTrimFactor = 1.0f;
     
     //private org.eclipse.swt.graphics.Image swtImage;
 
@@ -178,6 +186,7 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
 		prefs.addPreferenceChangeListener(this);
 		
 		highlightLinks = prefs.getBoolean(ToggleLinkHighlightHandler.PREF_LINKHIGHTLIGHT_ID, true);
+		autoTrimOn = prefs.getBoolean(ToggleAutoTrimHandler.PREF_AUTOTRIM_ID, true);
     }
 
     
@@ -299,13 +308,17 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	highlight = null;
 
     	boolean resize = false;
-    	int newW = Math.round(zoomFactor*page.getWidth());
-    	int newH = Math.round(zoomFactor*page.getHeight());
+    	// always round _down_ so that the fit-to-screen commands work properly
+    	int newW = (int) (zoomFactor*page.getWidth());
+    	int newH = (int) (zoomFactor*page.getHeight());
 
     	Point sz = getSize();
 
     	if (sz.x == 0 || sz.y == 0) return;
     	currentImage = page.getImage(newH, newW);
+    	if (autoTrimOn) {
+    		trimCurrentImage();
+    	}
 
     	newW = currentImage.getWidth(null);
     	newH = currentImage.getHeight(null);
@@ -329,16 +342,97 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	}
     }
 
+    private void trimCurrentImage() {
+    	if (currentImage==null)
+    		return;
+    	
+    	int origw = currentImage.getWidth(null);
+    	int origh = currentImage.getHeight(null);
+    	if (origw<1 || origh<1)
+    		return;
+    	
+    	BufferedImage img = new BufferedImage(origw, origh, BufferedImage.TYPE_INT_ARGB);
+    	img.getGraphics().drawImage(currentImage, 0, 0, origw, origh, 0, 0,	origw, origh, null);
+
+    	int[] srcbuf = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+
+    	// detect upper margin
+    	int trimy1 = origh;
+    	int referenceColor = srcbuf[0];
+    	for (int i=0; i!=srcbuf.length; i++) {
+    		if (srcbuf[i] != referenceColor) {
+    			trimy1 = i/origw;
+    			break;
+    		}
+    	}
+    	
+    	// detect lower margin
+    	int trimy2 = 0;
+    	referenceColor = srcbuf[srcbuf.length-1];
+    	for (int i=srcbuf.length-1; i!=trimy1*origw-1; i--) {
+    		if (srcbuf[i] != referenceColor) {
+    			trimy2 = i/origw + 1;
+    			break;
+    		}
+    	}
+    	
+    	// detect left margin
+    	int trimx1 = 0;
+    	referenceColor = srcbuf[0];
+    	int offset = trimy1*origw;
+    	int end = trimy2*origw;
+    	trimx1loop:
+    		while (trimx1 != origw) {
+    			for (int i=offset+trimx1; i<end; i+=origw) {
+    				if (srcbuf[i] != referenceColor)
+    					break trimx1loop;
+    			}
+    			trimx1++;
+    		}
+    	
+    	// detect right margin
+    	int trimx2 = origw-1;
+    	referenceColor = srcbuf[srcbuf.length-1];
+    	trimx2loop:
+    		while (trimx2 != trimy1) {
+    			for (int i=offset+trimx2; i<end; i+=origw) {
+    				if (srcbuf[i] != referenceColor)
+    					break trimx2loop;
+    			}
+    			trimx2--;
+    		}
+    	trimx2++;
+    	
+    	// add some margin (2% of the smaller one of the two dimensions) 
+    	int margin = Math.min(trimx2-trimx1, trimy2-trimy1) / 50;
+    	trimx1 = Math.max(0, trimx1-margin);
+    	trimx2 = Math.min(origw, trimx2+margin);
+    	trimy1 = Math.max(0, trimy1-margin);
+    	trimy2 = Math.min(origh, trimy2+margin);
+    	
+    	// remember trim margins
+    	trimOffset .x = trimx1;
+    	trimOffset.y = trimy1;
+    	horizontalTrimFactor = 1.0f * (trimx2-trimx1) / origw;
+    	verticalTrimFactor = 1.0f * (trimy2-trimy1) / origh;
+    	
+    	// crop image
+    	currentImage = img.getSubimage(trimx1, trimy1, trimx2-trimx1, trimy2-trimy1);
+    }
+    
     private Rectangle getRectangle(Rectangle2D r) {
     	return new Rectangle((int)Math.round(r.getX()), (int)Math.round(r.getY()), (int)Math.round(r.getWidth()), (int)Math.round(r.getHeight()));
     }
     
     public Rectangle2D convertPDF2ImageCoord(Rectangle2D r) {
-    	return currentPage.pdf2ImageCoordinates(r);
+    	Rectangle2D coord = currentPage.pdf2ImageCoordinates(r);
+    	coord.setRect(coord.getX()-trimOffset.x, coord.getY()-trimOffset.y, coord.getWidth(), coord.getHeight());
+    	return coord;
     }
     
     public Rectangle2D convertImage2PDFCoord(Rectangle2D r) {
-    	return currentPage.image2PdfCoordinates(r);
+    	java.awt.Rectangle coord = new java.awt.Rectangle((int)r.getX()+trimOffset.x, (int)r.getY()+trimOffset.y, (int)r.getWidth(), (int)r.getHeight());
+    	return currentPage.image2PdfCoordinates(coord);
     }
     
     /**
@@ -423,6 +517,15 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	if (ToggleLinkHighlightHandler.PREF_LINKHIGHTLIGHT_ID.equals(event.getKey())) {
     		highlightLinks = Boolean.parseBoolean((String)(event.getNewValue()));
     		redraw();
+    	} else if (ToggleAutoTrimHandler.PREF_AUTOTRIM_ID.equals(event.getKey())) {
+    		autoTrimOn = Boolean.parseBoolean((String)(event.getNewValue()));
+    		if (!autoTrimOn) {
+    			trimOffset.x = 0;
+    			trimOffset.y = 0;
+    			horizontalTrimFactor = 1.0f;
+    			verticalTrimFactor = 1.0f;
+    		}
+    		showPage(currentPage);
     	}
     }
     
@@ -445,4 +548,14 @@ public class PDFPageViewer extends Canvas implements PaintListener, IPreferenceC
     	IEclipsePreferences prefs = (new InstanceScope()).getNode(de.vonloesch.pdf4eclipse.Activator.PLUGIN_ID);
     	prefs.removePreferenceChangeListener(this);
     }
+
+
+	public float getHorizontalTrimFactor() {
+		return horizontalTrimFactor;
+	}
+
+
+	public float getVerticalTrimFactor() {
+		return verticalTrimFactor;
+	}
 }
