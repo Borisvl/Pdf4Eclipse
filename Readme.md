@@ -10,11 +10,11 @@ Installation
 
 To install the plugin simply use "Help/Install new plugins..." and write  
 
-http://borisvl.github.com/Pdf4Eclipse
+http://borisvl.github.io/Pdf4Eclipse
 
 as site.
 
-For more details visit the homepage: http://borisvl.github.com/Pdf4Eclipse
+For more details visit the homepage: http://borisvl.github.io/Pdf4Eclipse
 
 Dependencies
 --------------------------------
